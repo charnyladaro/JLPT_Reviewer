@@ -1,0 +1,546 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        color: #2c3e50;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #3498db);
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #2c3e50;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dashboard-title i {
+        color: #667eea;
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+        -webkit-text-fill-color: #667eea;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.1rem;
+        color: #34495e;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #667eea;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #1a1a1a;
+    }
+
+    .stat-label {
+        color: #2c3e50;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .stat-change {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+
+    .stat-change.positive {
+        color: #27ae60;
+    }
+
+    .stat-change.negative {
+        color: #e74c3c;
+    }
+
+    .dashboard-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        font-weight: 600;
+    }
+
+    .chart-container {
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .recent-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .recent-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        transition: background 0.3s ease;
+    }
+
+    .recent-item:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .recent-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-title {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .item-meta {
+        color: #4a5568;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .item-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .badge-books {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+
+    .badge-reviewers {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .badge-audio {
+        background: rgba(155, 89, 182, 0.1);
+        color: #9b59b6;
+    }
+
+    .badge-pending {
+        background: rgba(241, 196, 15, 0.1);
+        color: #f1c40f;
+    }
+
+    .badge-approved {
+        background: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .quick-action {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quick-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .quick-action i {
+        font-size: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        
+        .stats-overview {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            padding: 1.5rem;
+        }
+        
+        .recent-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+
+    /* Additional styling for better visual hierarchy */
+    .dashboard-header {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Enhanced readability for all text elements */
+    .dashboard-header * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Admin Dashboard</span>
+        </h1>
+        <p class="dashboard-subtitle">Manage your JLPT study system</p>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <i class="fas fa-book stat-icon"></i>
+            <div class="stat-number">{{ stats.total_materials }}</div>
+            <div class="stat-label">Total Materials</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> {{ stats.materials_by_category.books + stats.materials_by_category.reviewers + stats.materials_by_category.audio }} active
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-users stat-icon"></i>
+            <div class="stat-number">{{ stats.total_users }}</div>
+            <div class="stat-label">Registered Users</div>
+            <div class="stat-change positive">
+                <i class="fas fa-plus"></i> {{ stats.new_users_this_week }} this week
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-graduation-cap stat-icon"></i>
+            <div class="stat-number">{{ stats.total_courses }}</div>
+            <div class="stat-label">Total Courses</div>
+            <div class="stat-change positive">
+                <i class="fas fa-check"></i> {{ stats.active_courses }} active
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-user-graduate stat-icon"></i>
+            <div class="stat-number">{{ stats.pending_enrollments }}</div>
+            <div class="stat-label">Pending Enrollments</div>
+            {% if stats.pending_enrollments > 0 %}
+            <div class="stat-change negative">
+                <i class="fas fa-clock"></i> Needs attention
+            </div>
+            {% else %}
+            <div class="stat-change positive">
+                <i class="fas fa-check"></i> All processed
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-check-circle stat-icon"></i>
+            <div class="stat-number">{{ stats.approved_enrollments }}</div>
+            <div class="stat-label">Active Students</div>
+            <div class="stat-change positive">
+                <i class="fas fa-users"></i> {{ stats.total_enrollments }} total
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-hdd stat-icon"></i>
+            <div class="stat-number">{{ stats.storage_used }}</div>
+            <div class="stat-label">Storage Used (MB)</div>
+            <div class="stat-change positive">
+                <i class="fas fa-database"></i> System healthy
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-section">
+        <h2 class="section-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+        </h2>
+        <div class="quick-actions">
+            <a href="/admin/courses/create" class="quick-action">
+                <i class="fas fa-plus"></i>
+                <span>Create Course</span>
+            </a>
+            <a href="/admin/upload" class="quick-action">
+                <i class="fas fa-upload"></i>
+                <span>Upload Material</span>
+            </a>
+            <a href="/admin/enrollments" class="quick-action">
+                <i class="fas fa-user-check"></i>
+                <span>Manage Enrollments</span>
+            </a>
+            <a href="/admin/users" class="quick-action">
+                <i class="fas fa-users-cog"></i>
+                <span>Manage Users</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Materials -->
+        <div class="col-lg-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Materials
+                </h2>
+                {% if recent_materials %}
+                <ul class="recent-list">
+                    {% for material in recent_materials %}
+                    <li class="recent-item">
+                        <div class="item-info">
+                            <div class="item-title">{{ material.original_filename }}</div>
+                            <div class="item-meta">{{ material.jlpt_level }} • {{ material.upload_date[:10] }}</div>
+                        </div>
+                        <span class="item-badge badge-{{ material.category }}">{{ material.category.title() }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="/admin/manage" class="btn btn-primary">View All Materials</a>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">No materials uploaded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="col-lg-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-plus"></i>
+                    Recent Users
+                </h2>
+                {% if recent_users %}
+                <ul class="recent-list">
+                    {% for user in recent_users %}
+                    <li class="recent-item">
+                        <div class="item-info">
+                            <div class="item-title">{{ user.full_name or user.username }}</div>
+                            <div class="item-meta">{{ user.email }} • {{ user.created_at[:10] }}</div>
+                        </div>
+                        <span class="item-badge badge-approved">New</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="/admin/users" class="btn btn-primary">Manage Users</a>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">No users registered yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Enrollments -->
+        <div class="col-lg-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Recent Enrollments
+                </h2>
+                {% if recent_enrollments %}
+                <ul class="recent-list">
+                    {% for enrollment in recent_enrollments %}
+                    <li class="recent-item">
+                        <div class="item-info">
+                            <div class="item-title">{{ enrollment.full_name or enrollment.username }}</div>
+                            <div class="item-meta">{{ enrollment.title }} • {{ enrollment.enrolled_at[:10] }}</div>
+                        </div>
+                        <span class="item-badge badge-{{ enrollment.status }}">{{ enrollment.status.title() }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="/admin/enrollments" class="btn btn-primary">Manage Enrollments</a>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">No enrollment requests yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Popular Courses -->
+        <div class="col-lg-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i>
+                    Popular Courses
+                </h2>
+                {% if popular_courses %}
+                <ul class="recent-list">
+                    {% for course in popular_courses %}
+                    <li class="recent-item">
+                        <div class="item-info">
+                            <div class="item-title">{{ course.title }}</div>
+                            <div class="item-meta">{{ course.jlpt_level }} Level</div>
+                        </div>
+                        <span class="item-badge badge-approved">{{ course.enrollment_count }} students</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="/admin/courses" class="btn btn-primary">Manage Courses</a>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">No courses created yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Materials by Level -->
+    <div class="dashboard-section">
+        <h2 class="section-title">
+            <i class="fas fa-chart-bar"></i>
+            Materials by JLPT Level
+        </h2>
+        <div class="row">
+            {% for level, count in stats.materials_by_level.items() %}
+            <div class="col-md-2 col-6 mb-3">
+                <div class="text-center p-3" style="background: rgba(102, 126, 234, 0.1); border-radius: 12px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #1a1a1a;">{{ count }}</div>
+                    <div style="color: #2c3e50; font-weight: 600;">{{ level }} Materials</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

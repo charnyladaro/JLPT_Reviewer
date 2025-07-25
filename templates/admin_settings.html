@@ -1,0 +1,377 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Settings - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">
+                <i class="fas fa-sliders-h text-primary"></i>
+                Admin Settings
+            </h2>
+            <p class="text-muted">Configure system settings and preferences</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- System Settings -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog"></i>
+                        System Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="siteName" class="form-label">Site Name</label>
+                            <input type="text" class="form-control" id="siteName" value="JLPT Study System">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="maxFileSize" class="form-label">Max File Size (MB)</label>
+                            <input type="number" class="form-control" id="maxFileSize" value="100">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="allowRegistration" class="form-label">User Registration</label>
+                            <select class="form-select" id="allowRegistration">
+                                <option value="enabled" selected>Enabled</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                <label class="form-check-label" for="emailNotifications">
+                                    Email Notifications
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- File Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-folder"></i>
+                        File Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Allowed File Types</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Books:</strong>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="pdfBooks" checked>
+                                    <label class="form-check-label" for="pdfBooks">PDF</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="epubBooks" checked>
+                                    <label class="form-check-label" for="epubBooks">EPUB</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="mobiBooks" checked>
+                                    <label class="form-check-label" for="mobiBooks">MOBI</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Reviewers:</strong>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="pdfReviewers" checked>
+                                    <label class="form-check-label" for="pdfReviewers">PDF</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="docReviewers" checked>
+                                    <label class="form-check-label" for="docReviewers">DOC/DOCX</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="txtReviewers" checked>
+                                    <label class="form-check-label" for="txtReviewers">TXT</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Audio:</strong>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="mp3Audio" checked>
+                                    <label class="form-check-label" for="mp3Audio">MP3</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="wavAudio" checked>
+                                    <label class="form-check-label" for="wavAudio">WAV</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="flacAudio" checked>
+                                    <label class="form-check-label" for="flacAudio">FLAC</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success">
+                            <i class="fas fa-save"></i> Update File Settings
+                        </button>
+                        <button class="btn btn-warning">
+                            <i class="fas fa-broom"></i> Clean Orphaned Files
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Database Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-database"></i>
+                        Database Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> These operations affect the entire database. Use with caution.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-info">
+                            <i class="fas fa-download"></i> Backup Database
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-chart-bar"></i> Database Statistics
+                        </button>
+                        <button class="btn btn-warning">
+                            <i class="fas fa-tools"></i> Optimize Database
+                        </button>
+                        <button class="btn btn-danger" onclick="confirmDatabaseReset()">
+                            <i class="fas fa-trash-alt"></i> Reset Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Account Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-shield"></i>
+                        Admin Account
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" placeholder="Enter current password">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" id="adminEmail" value="admin@jlpt.com">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-key"></i> Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Information -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        System Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>System Version:</strong><br>
+                            <span class="badge bg-primary">v1.0.0</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Database Size:</strong><br>
+                            <span id="dbSize">Calculating...</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Upload Directory:</strong><br>
+                            <code>/uploads</code>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Last Backup:</strong><br>
+                            <span class="text-muted">Never</span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Server Status</h5>
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check-circle"></i> Online
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Storage Status</h5>
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-hdd"></i> Normal
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Security Status</h5>
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-shield-alt"></i> Secure
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Log -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history"></i>
+                        Recent Admin Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td id="current-timestamp">Loading...</td>
+                                    <td><span class="badge bg-primary">Login</span></td>
+                                    <td>Admin logged in</td>
+                                    <td>127.0.0.1</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <i class="fas fa-info-circle"></i>
+                                        Activity logging will be implemented in future updates
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set current timestamp using JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const timestamp = now.getFullYear() + '-' + 
+                     String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(now.getDate()).padStart(2, '0') + ' ' + 
+                     String(now.getHours()).padStart(2, '0') + ':' + 
+                     String(now.getMinutes()).padStart(2, '0') + ':' + 
+                     String(now.getSeconds()).padStart(2, '0');
+    
+    document.getElementById('current-timestamp').textContent = timestamp;
+});
+
+// Calculate database size
+fetch('/api/admin/system-info')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('dbSize').textContent = data.database_size || 'Unknown';
+    })
+    .catch(error => {
+        document.getElementById('dbSize').textContent = 'Error loading';
+    });
+
+function confirmDatabaseReset() {
+    if (confirm('Are you sure you want to reset the database? This will delete ALL data and cannot be undone!')) {
+        if (confirm('This is your FINAL warning. All materials, users, and data will be permanently deleted. Continue?')) {
+            alert('Database reset functionality would be implemented here.');
+        }
+    }
+}
+
+// Form submission handlers
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show success message for demo
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            Settings updated successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert alert at the top of the container
+        const container = document.querySelector('.container .row');
+        container.insertBefore(alert, container.firstChild);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}

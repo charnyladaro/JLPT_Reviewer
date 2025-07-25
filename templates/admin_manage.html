@@ -1,0 +1,737 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Manage Materials - JLPT Study System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .manage-header {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        color: #2c3e50;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .manage-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #27ae60);
+    }
+
+    .manage-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #2c3e50;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .manage-title i {
+        color: #667eea;
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+        -webkit-text-fill-color: #667eea;
+    }
+
+    .manage-subtitle {
+        font-size: 1.1rem;
+        color: #34495e;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: 0.5px;
+    }
+
+    .filters-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .filters-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .search-input {
+        grid-column: 1 / -1;
+        margin-bottom: 1rem;
+    }
+
+    .materials-table {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .table th {
+        background: rgba(102, 126, 234, 0.1);
+        color: #333;
+        font-weight: bold;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        vertical-align: middle;
+    }
+
+    .table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .material-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .material-icon {
+        font-size: 1.5rem;
+        color: #667eea;
+    }
+
+    .material-details h4 {
+        color: #333;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .material-details p {
+        color: #666;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .level-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-align: center;
+        min-width: 50px;
+    }
+
+    .category-badge {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.3rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-small {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+
+    .file-size {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .upload-date {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.3;
+    }
+
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        color: #2c3e50;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .summary-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #667eea;
+    }
+
+    .summary-label {
+        font-size: 0.9rem;
+        color: #34495e;
+        font-weight: 500;
+    }
+
+    .bulk-actions {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .bulk-actions.show {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .selected-count {
+        color: #e67e22;
+        font-weight: bold;
+    }
+
+    .checkbox-cell {
+        text-align: center;
+        width: 40px;
+    }
+
+    .material-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .sort-header {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+
+    .sort-header:hover {
+        background: rgba(102, 126, 234, 0.15);
+    }
+
+    .sort-header::after {
+        content: '';
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-bottom: 4px solid #999;
+        opacity: 0.3;
+    }
+
+    .sort-header.sort-asc::after {
+        border-bottom: 4px solid #667eea;
+        border-top: none;
+        opacity: 1;
+    }
+
+    .sort-header.sort-desc::after {
+        border-top: 4px solid #667eea;
+        border-bottom: none;
+        opacity: 1;
+    }
+
+    /* Enhanced animation and readability */
+    .manage-header {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .manage-header * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    @media (max-width: 768px) {
+        .manage-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        
+        .filters-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .materials-table {
+            padding: 1rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .bulk-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="manage-header">
+        <h1 class="manage-title">
+            <i class="fas fa-cogs"></i>
+            <span>Manage Materials</span>
+        </h1>
+        <p class="manage-subtitle">View, organize, and manage all uploaded study materials</p>
+    </div>
+
+    <div class="stats-summary">
+        <div class="summary-card">
+            <div class="summary-number">{{ materials|length }}</div>
+            <div class="summary-label">Total Materials</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ materials|selectattr('category', 'equalto', 'books')|list|length }}</div>
+            <div class="summary-label">Books</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ materials|selectattr('category', 'equalto', 'reviewers')|list|length }}</div>
+            <div class="summary-label">Reviewers</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ materials|selectattr('category', 'equalto', 'audio')|list|length }}</div>
+            <div class="summary-label">Audio Files</div>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="form-group search-input">
+            <label for="search" class="form-label">
+                <i class="fas fa-search"></i> Search Materials
+            </label>
+            <input type="text" id="search" class="form-control" placeholder="Search by filename, description, or uploader..." onkeyup="filterMaterials()">
+        </div>
+        
+        <div class="filters-row">
+            <div class="form-group">
+                <label for="level-filter" class="form-label">Filter by Level</label>
+                <select id="level-filter" class="form-control form-select" onchange="filterMaterials()">
+                    <option value="">All Levels</option>
+                    <option value="N5">N5 - Beginner</option>
+                    <option value="N4">N4 - Elementary</option>
+                    <option value="N3">N3 - Intermediate</option>
+                    <option value="N2">N2 - Upper Inter.</option>
+                    <option value="N1">N1 - Advanced</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="category-filter" class="form-label">Filter by Category</label>
+                <select id="category-filter" class="form-control form-select" onchange="filterMaterials()">
+                    <option value="">All Categories</option>
+                    <option value="books">Books & Textbooks</option>
+                    <option value="reviewers">Reviewers & Notes</option>
+                    <option value="audio">Audio Files</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bulk-actions" id="bulk-actions">
+        <div class="selected-count" id="selected-count">0 materials selected</div>
+        <div>
+            <button class="btn btn-danger btn-small" onclick="deleteSelected()">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+        </div>
+    </div>
+
+    <div class="materials-table">
+        {% if materials %}
+        <table class="table" id="materials-table">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell">
+                        <input type="checkbox" id="select-all" onchange="toggleSelectAll()" class="material-checkbox">
+                    </th>
+                    <th class="sort-header" onclick="sortTable('name')">Material</th>
+                    <th class="sort-header" onclick="sortTable('level')">Level</th>
+                    <th class="sort-header" onclick="sortTable('category')">Category</th>
+                    <th class="sort-header" onclick="sortTable('size')">Size</th>
+                    <th class="sort-header" onclick="sortTable('date')">Upload Date</th>
+                    <th class="sort-header" onclick="sortTable('uploader')">Uploader</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="materials-tbody">
+                {% for material in materials %}
+                <tr data-level="{{ material.jlpt_level }}" data-category="{{ material.category }}" data-id="{{ material.id }}">
+                    <td class="checkbox-cell">
+                        <input type="checkbox" class="material-checkbox row-checkbox" value="{{ material.id }}" onchange="updateBulkActions()">
+                    </td>
+                    <td>
+                        <div class="material-info">
+                            <div class="material-icon">
+                                {% if material.category == 'books' %}
+                                    <i class="fas fa-book"></i>
+                                {% elif material.category == 'reviewers' %}
+                                    <i class="fas fa-file-alt"></i>
+                                {% elif material.category == 'audio' %}
+                                    <i class="fas fa-file-audio"></i>
+                                {% endif %}
+                            </div>
+                            <div class="material-details">
+                                <h4>{{ material.original_filename }}</h4>
+                                {% if material.description %}
+                                <p>{{ material.description[:50] }}{% if material.description|length > 50 %}...{% endif %}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="level-badge">{{ material.jlpt_level }}</span>
+                    </td>
+                    <td>
+                        <span class="category-badge">{{ material.category.title() }}</span>
+                    </td>
+                    <td class="file-size">
+                        {% if material.file_size %}
+                            {{ "%.1f"|format(material.file_size / 1024 / 1024) }} MB
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </td>
+                    <td class="upload-date">
+                        {{ material.upload_date.strftime('%Y-%m-%d') }}<br>
+                        <small>{{ material.upload_date.strftime('%H:%M') }}</small>
+                    </td>
+                    <td>{{ material.uploaded_by_name or 'Admin' }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/api/download/{{ material.id }}" class="btn btn-primary btn-small" target="_blank">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <button class="btn btn-danger btn-small" onclick="deleteMaterial({{ material.id }}, '{{ material.original_filename }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <h3>No Materials Found</h3>
+            <p>No study materials have been uploaded yet.</p>
+            <a href="{{ url_for('admin_upload_page') }}" class="btn btn-primary mt-4">
+                <i class="fas fa-upload"></i> Upload First Material
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let sortOrder = {};
+    
+    // Filter materials
+    function filterMaterials() {
+        const search = document.getElementById('search').value.toLowerCase();
+        const levelFilter = document.getElementById('level-filter').value;
+        const categoryFilter = document.getElementById('category-filter').value;
+        const rows = document.querySelectorAll('#materials-tbody tr');
+        
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const level = row.dataset.level;
+            const category = row.dataset.category;
+            
+            const matchesSearch = !search || text.includes(search);
+            const matchesLevel = !levelFilter || level === levelFilter;
+            const matchesCategory = !categoryFilter || category === categoryFilter;
+            
+            if (matchesSearch && matchesLevel && matchesCategory) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update empty state
+        const tbody = document.getElementById('materials-tbody');
+        if (visibleCount === 0 && tbody.children.length > 0) {
+            showNoResults();
+        } else {
+            hideNoResults();
+        }
+    }
+    
+    // Clear filters
+    function clearFilters() {
+        document.getElementById('search').value = '';
+        document.getElementById('level-filter').value = '';
+        document.getElementById('category-filter').value = '';
+        filterMaterials();
+    }
+    
+    // Sort table
+    function sortTable(column) {
+        const tbody = document.getElementById('materials-tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const headers = document.querySelectorAll('.sort-header');
+        
+        // Remove previous sort classes
+        headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+        
+        // Determine sort direction
+        const currentOrder = sortOrder[column] || 'asc';
+        const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+        sortOrder = { [column]: newOrder };
+        
+        // Add sort class to current header
+        const currentHeader = Array.from(headers).find(h => h.textContent.includes(getColumnTitle(column)));
+        if (currentHeader) {
+            currentHeader.classList.add(newOrder === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+        
+        // Sort rows
+        rows.sort((a, b) => {
+            let aVal = getSortValue(a, column);
+            let bVal = getSortValue(b, column);
+            
+            if (column === 'size' || column === 'date') {
+                aVal = parseFloat(aVal) || 0;
+                bVal = parseFloat(bVal) || 0;
+            }
+            
+            if (aVal < bVal) return newOrder === 'asc' ? -1 : 1;
+            if (aVal > bVal) return newOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        // Reorder DOM
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    function getSortValue(row, column) {
+        switch(column) {
+            case 'name':
+                return row.querySelector('.material-details h4').textContent.toLowerCase();
+            case 'level':
+                return row.dataset.level;
+            case 'category':
+                return row.dataset.category;
+            case 'size':
+                const sizeText = row.querySelector('.file-size').textContent;
+                return parseFloat(sizeText) || 0;
+            case 'date':
+                return new Date(row.querySelector('.upload-date').textContent.split('\n')[0]).getTime();
+            case 'uploader':
+                return row.cells[6].textContent.toLowerCase();
+            default:
+                return '';
+        }
+    }
+    
+    function getColumnTitle(column) {
+        const titles = {
+            name: 'Material',
+            level: 'Level',
+            category: 'Category',
+            size: 'Size',
+            date: 'Upload Date',
+            uploader: 'Uploader'
+        };
+        return titles[column] || column;
+    }
+    
+    // Select all functionality
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            if (checkbox.closest('tr').style.display !== 'none') {
+                checkbox.checked = selectAll.checked;
+            }
+        });
+        
+        updateBulkActions();
+    }
+    
+    // Update bulk actions
+    function updateBulkActions() {
+        const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectedCount = document.getElementById('selected-count');
+        
+        const count = checkboxes.length;
+        selectedCount.textContent = `${count} material${count !== 1 ? 's' : ''} selected`;
+        
+        if (count > 0) {
+            bulkActions.classList.add('show');
+        } else {
+            bulkActions.classList.remove('show');
+        }
+    }
+    
+    // Delete material
+    function deleteMaterial(id, filename) {
+        if (confirm(`Are you sure you want to delete "${filename}"?`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/delete/${id}`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    // Delete selected materials
+    function deleteSelected() {
+        const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+        const count = checkboxes.length;
+        
+        if (count === 0) return;
+        
+        if (confirm(`Are you sure you want to delete ${count} selected material${count !== 1 ? 's' : ''}?`)) {
+            checkboxes.forEach(checkbox => {
+                const id = checkbox.value;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/delete/${id}`;
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
+    }
+    
+    function showNoResults() {
+        const tbody = document.getElementById('materials-tbody');
+        if (!document.getElementById('no-results-row')) {
+            const row = document.createElement('tr');
+            row.id = 'no-results-row';
+            row.innerHTML = `
+                <td colspan="8" class="text-center" style="padding: 3rem;">
+                    <div style="color: #666;">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <h4>No materials match your search criteria</h4>
+                        <p>Try adjusting your filters or search terms.</p>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+    }
+    
+    function hideNoResults() {
+        const noResultsRow = document.getElementById('no-results-row');
+        if (noResultsRow) {
+            noResultsRow.remove();
+        }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-focus search
+        document.getElementById('search').focus();
+    });
+</script>
+{% endblock %}

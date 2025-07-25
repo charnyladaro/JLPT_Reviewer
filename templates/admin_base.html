@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - JLPT Study System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: rgba(0, 0, 0, 0.8) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #3498db !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .admin-badge {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 0.2rem;
+            border-radius: 8px;
+            padding: 0.5rem 1rem !important;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: #3498db !important;
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .navbar-nav .nav-link.active {
+            color: #3498db !important;
+            background: rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        .admin-info {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .admin-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-logout {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-logout:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-back-to-site {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid rgba(52, 152, 219, 0.4);
+            color: #3498db;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-back-to-site:hover {
+            background: rgba(52, 152, 219, 0.3);
+            border-color: rgba(52, 152, 219, 0.6);
+            color: #3498db;
+            transform: translateY(-1px);
+        }
+        
+        /* Notification badge for pending items */
+        .nav-notification {
+            position: relative;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 991px) {
+            .admin-info {
+                margin: 0.5rem 0;
+                justify-content: center;
+            }
+            
+            .btn-logout, .btn-back-to-site {
+                margin: 0.25rem;
+                width: 100%;
+            }
+        }
+        
+        /* Flash messages styling for admin */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 2rem;
+        }
+        
+        .alert-success {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+            color: #27ae60;
+        }
+        
+        .alert-danger {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+        }
+        
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            color: #3498db;
+        }
+        
+        .alert-warning {
+            background: rgba(241, 196, 15, 0.1);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            color: #f39c12;
+        }
+        
+        /* Admin content area styling */
+        .admin-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        
+        /* Quick stats for admin */
+        .admin-quick-stats {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .quick-stat {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .quick-stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .quick-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Active navigation highlighting */
+        .navbar-nav .nav-link[href*="dashboard"].active,
+        .navbar-nav .nav-link[href*="dashboard"]:hover {
+            color: #3498db !important;
+        }
+        
+        .navbar-nav .nav-link[href*="courses"].active,
+        .navbar-nav .nav-link[href*="courses"]:hover {
+            color: #27ae60 !important;
+        }
+        
+        .navbar-nav .nav-link[href*="upload"].active,
+        .navbar-nav .nav-link[href*="upload"]:hover {
+            color: #f39c12 !important;
+        }
+        
+        .navbar-nav .nav-link[href*="manage"].active,
+        .navbar-nav .nav-link[href*="manage"]:hover {
+            color: #e67e22 !important;
+        }
+        
+        .navbar-nav .nav-link[href*="users"].active,
+        .navbar-nav .nav-link[href*="users"]:hover {
+            color: #9b59b6 !important;
+        }
+        
+        .navbar-nav .nav-link[href*="enrollments"].active,
+        .navbar-nav .nav-link[href*="enrollments"]:hover {
+            color: #e74c3c !important;
+        }
+        
+        .navbar-nav .nav-link[href*="settings"].active,
+        .navbar-nav .nav-link[href*="settings"]:hover {
+            color: #95a5a6 !important;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/admin/dashboard">
+            <i class="fas fa-shield-alt"></i>
+            Admin Panel
+            <span class="admin-badge">Admin</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                {% if session.admin_id %}
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}" href="/admin/dashboard">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if 'courses' in request.endpoint }}" href="/admin/courses">
+                        <i class="fas fa-graduation-cap"></i> Courses
+                    </a>
+                </li>
+                <li class="nav-item nav-notification">
+                    <a class="nav-link {{ 'active' if 'enrollment' in request.endpoint }}" href="/admin/enrollments">
+                        <i class="fas fa-user-graduate"></i> Enrollments
+                        <span class="notification-badge" id="pending-enrollments-badge" style="display: none;">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_upload_page' }}" href="/admin/upload">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Materials
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_manage' }}" href="/admin/manage">
+                        <i class="fas fa-cogs"></i> Manage Materials
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_users' }}" href="/admin/users">
+                        <i class="fas fa-users"></i> Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_settings' }}" href="/admin/settings">
+                        <i class="fas fa-sliders-h"></i> Settings
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            
+            <div class="d-flex align-items-center">
+                {% if session.admin_id %}
+                    <!-- Admin is logged in -->
+                    <a href="/" class="btn btn-back-to-site btn-sm">
+                        <i class="fas fa-globe"></i> Back to Site
+                    </a>
+                    <div class="admin-info">
+                        <div class="admin-avatar">
+                            {{ session.admin_username[0].upper() if session.admin_username else 'A' }}
+                        </div>
+                        <span>{{ session.admin_username }}</span>
+                    </div>
+                    <a href="/admin/logout" class="btn btn-logout btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    {% if session.admin_id %}
+    <!-- Quick Admin Stats -->
+    <div class="admin-quick-stats">
+        <div class="quick-stat">
+            <div class="quick-stat-number" id="total-materials">0</div>
+            <div class="quick-stat-label">Total Materials</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-number" id="total-users">0</div>
+            <div class="quick-stat-label">Registered Users</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-number" id="total-courses">0</div>
+            <div class="quick-stat-label">Total Courses</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-number" id="pending-enrollments">0</div>
+            <div class="quick-stat-label">Pending Enrollments</div>
+        </div>
+        <div class="quick-stat">
+            <div class="quick-stat-number" id="storage-used">0</div>
+            <div class="quick-stat-label">Storage Used (MB)</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="admin-content">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Load admin stats and update notification badges
+if (document.getElementById('total-materials')) {
+    fetch('/api/admin/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-materials').textContent = data.total_materials || 0;
+            document.getElementById('total-users').textContent = data.total_users || 0;
+            document.getElementById('total-courses').textContent = data.total_courses || 0;
+            document.getElementById('pending-enrollments').textContent = data.pending_enrollments || 0;
+            document.getElementById('storage-used').textContent = data.storage_used || 0;
+            
+            // Update notification badge for pending enrollments
+            const pendingCount = data.pending_enrollments || 0;
+            const badge = document.getElementById('pending-enrollments-badge');
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(error => console.log('Stats loading error:', error));
+}
+
+// Auto-refresh stats every 30 seconds
+setInterval(() => {
+    if (document.getElementById('total-materials')) {
+        fetch('/api/admin/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-materials').textContent = data.total_materials || 0;
+                document.getElementById('total-users').textContent = data.total_users || 0;
+                document.getElementById('total-courses').textContent = data.total_courses || 0;
+                document.getElementById('pending-enrollments').textContent = data.pending_enrollments || 0;
+                document.getElementById('storage-used').textContent = data.storage_used || 0;
+                
+                // Update notification badge
+                const pendingCount = data.pending_enrollments || 0;
+                const badge = document.getElementById('pending-enrollments-badge');
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(error => console.log('Stats refresh error:', error));
+    }
+}, 30000);
+
+// Add smooth transitions for navigation
+document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+    link.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-1px)';
+    });
+    
+    link.addEventListener('mouseleave', function() {
+        if (!this.classList.contains('active')) {
+            this.style.transform = 'translateY(0)';
+        }
+    });
+});
+
+// Keyboard shortcuts for admin navigation
+document.addEventListener('keydown', function(e) {
+    if (e.altKey && e.key >= '1' && e.key <= '7') {
+        e.preventDefault();
+        const links = [
+            '/admin/dashboard',      // Alt+1
+            '/admin/courses',        // Alt+2
+            '/admin/enrollments',    // Alt+3
+            '/admin/upload',         // Alt+4
+            '/admin/manage',         // Alt+5
+            '/admin/users',          // Alt+6
+            '/admin/settings'        // Alt+7
+        ];
+        
+        const index = parseInt(e.key) - 1;
+        if (links[index]) {
+            window.location.href = links[index];
+        }
+    }
+    
+    // Alt+0 to go back to main site
+    if (e.altKey && e.key === '0') {
+        e.preventDefault();
+        window.location.href = '/';
+    }
+});
+
+// Show keyboard shortcuts tooltip on hover
+document.querySelectorAll('.navbar-nav .nav-link').forEach((link, index) => {
+    const shortcut = `Alt+${index + 1}`;
+    link.title = `${link.textContent.trim()} (${shortcut})`;
+});
+
+// Add loading indicator for page transitions
+document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        if (this.href && this.href !== window.location.href) {
+            // Add loading indicator
+            const icon = this.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'fas fa-spinner fa-spin';
+            
+            // Restore original icon after navigation or timeout
+            setTimeout(() => {
+                icon.className = originalClass;
+            }, 2000);
+        }
+    });
+});
+
+// Add notification sound for new pending enrollments (if supported)
+let lastPendingCount = 0;
+
+function checkForNewEnrollments(currentCount) {
+    if (currentCount > lastPendingCount && lastPendingCount > 0) {
+        // Play notification sound if browser supports it
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMbCS2Z2e7JeSsH');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // Ignore errors if audio fails
+        } catch (e) {
+            // Ignore audio errors
+        }
+    }
+    lastPendingCount = currentCount;
+}
+
+// Monitor pending enrollments count changes
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.target.id === 'pending-enrollments') {
+            const newCount = parseInt(mutation.target.textContent) || 0;
+            checkForNewEnrollments(newCount);
+        }
+    });
+});
+
+if (document.getElementById('pending-enrollments')) {
+    observer.observe(document.getElementById('pending-enrollments'), { childList: true, characterData: true });
+}
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

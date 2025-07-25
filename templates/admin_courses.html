@@ -1,0 +1,451 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Create Course - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #2c3e50;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .create-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .create-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #2c3e50;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-title i {
+        color: #667eea;
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+    }
+
+    .create-subtitle {
+        font-size: 1.1rem;
+        color: #34495e;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .create-form {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group-full {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1.25rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 12px;
+        margin-top: 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .back-btn {
+        background: rgba(108, 117, 125, 0.1);
+        border: 2px solid rgba(108, 117, 125, 0.2);
+        color: #6c757d;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+        background: rgba(108, 117, 125, 0.15);
+        border-color: rgba(108, 117, 125, 0.3);
+        color: #6c757d;
+        text-decoration: none;
+        transform: translateX(-2px);
+    }
+
+    .requirements-section {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .requirements-title {
+        color: #667eea;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .requirements-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .requirements-list li {
+        color: #666;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .requirements-list li::before {
+        content: "✓";
+        color: #667eea;
+        font-weight: bold;
+    }
+
+    /* Enhanced readability for better contrast */
+    .create-header .create-title {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .create-header .create-subtitle {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    @media (max-width: 768px) {
+        .create-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .create-form {
+            padding: 2rem 1.5rem;
+        }
+    }
+
+    /* Additional contrast improvements */
+    .create-header {
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .create-title {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+    }
+
+    .create-subtitle {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="create-header">
+        <h1 class="create-title">
+            <i class="fas fa-plus-circle"></i>
+            <span>Create New Course</span>
+        </h1>
+        <p class="create-subtitle">Set up a new JLPT course with materials and enrollment options</p>
+    </div>
+
+    <a href="{{ url_for('admin_courses') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Courses
+    </a>
+
+    <div class="create-form">
+        <div class="requirements-section">
+            <div class="requirements-title">
+                <i class="fas fa-info-circle"></i>
+                Course Creation Guidelines
+            </div>
+            <ul class="requirements-list">
+                <li>Choose an appropriate JLPT level for targeted learning</li>
+                <li>Write a clear, descriptive title and detailed description</li>
+                <li>Set realistic duration and student limits</li>
+                <li>You can add materials after creating the course</li>
+                <li>Course will be immediately available for enrollment</li>
+            </ul>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin_create_course') }}" id="create-course-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title" class="form-label">
+                        <i class="fas fa-graduation-cap"></i> Course Title
+                    </label>
+                    <input type="text" id="title" name="title" class="form-control" 
+                           placeholder="e.g., N5 Complete Grammar Course" required maxlength="200">
+                    <div class="help-text">Choose a clear, descriptive title for your course</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="jlpt_level" class="form-label">
+                        <i class="fas fa-layer-group"></i> JLPT Level
+                    </label>
+                    <select id="jlpt_level" name="jlpt_level" class="form-control form-select" required>
+                        <option value="">Select Level</option>
+                        <option value="N5">N5 - Beginner</option>
+                        <option value="N4">N4 - Elementary</option>
+                        <option value="N3">N3 - Intermediate</option>
+                        <option value="N2">N2 - Upper Intermediate</option>
+                        <option value="N1">N1 - Advanced</option>
+                    </select>
+                    <div class="help-text">Select the appropriate JLPT level for this course</div>
+                </div>
+            </div>
+
+            <div class="form-group form-group-full">
+                <label for="description" class="form-label">
+                    <i class="fas fa-align-left"></i> Course Description
+                </label>
+                <textarea id="description" name="description" class="form-control" rows="4" 
+                          placeholder="Provide a detailed description of what students will learn in this course..." required></textarea>
+                <div class="help-text">Describe the course content, objectives, and what students will achieve</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="instructor_name" class="form-label">
+                        <i class="fas fa-user-tie"></i> Instructor Name
+                    </label>
+                    <input type="text" id="instructor_name" name="instructor_name" class="form-control" 
+                           placeholder="Enter instructor name" maxlength="100">
+                    <div class="help-text">Name of the course instructor (optional)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration_weeks" class="form-label">
+                        <i class="fas fa-calendar-alt"></i> Duration (Weeks)
+                    </label>
+                    <input type="number" id="duration_weeks" name="duration_weeks" class="form-control" 
+                           placeholder="e.g., 12" min="1" max="52">
+                    <div class="help-text">Expected course duration in weeks (optional)</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="max_students" class="form-label">
+                        <i class="fas fa-users"></i> Maximum Students
+                    </label>
+                    <input type="number" id="max_students" name="max_students" class="form-control" 
+                           placeholder="e.g., 30" min="1" max="1000">
+                    <div class="help-text">Maximum number of students (leave blank for unlimited)</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-info-circle"></i> Course Status
+                    </label>
+                    <div style="padding: 0.8rem 1rem; background: rgba(72, 187, 120, 0.1); border-radius: 8px; color: #2f855a;">
+                        <i class="fas fa-check-circle"></i> Course will be created as <strong>Active</strong>
+                    </div>
+                    <div class="help-text">Students can immediately enroll in active courses</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn submit-btn" id="submit-btn">
+                <i class="fas fa-plus"></i> Create Course
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation and enhancement
+document.getElementById('create-course-form').addEventListener('submit', function(event) {
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Course...';
+    
+    // Basic validation
+    const title = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const jlptLevel = document.getElementById('jlpt_level').value;
+    
+    if (!title || !description || !jlptLevel) {
+        event.preventDefault();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Course';
+        alert('Please fill in all required fields.');
+        return;
+    }
+    
+    if (title.length < 5) {
+        event.preventDefault();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Course';
+        alert('Course title must be at least 5 characters long.');
+        return;
+    }
+    
+    if (description.length < 20) {
+        event.preventDefault();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Create Course';
+        alert('Course description must be at least 20 characters long.');
+        return;
+    }
+});
+
+// Character counter for title and description
+function addCharacterCounter(inputId, maxLength) {
+    const input = document.getElementById(inputId);
+    const helpText = input.nextElementSibling;
+    
+    input.addEventListener('input', function() {
+        const remaining = maxLength - this.value.length;
+        const originalText = helpText.textContent;
+        
+        if (remaining < maxLength * 0.2) {
+            helpText.innerHTML = originalText + ` <span style="color: ${remaining < 20 ? '#e74c3c' : '#f39c12'}">(${remaining} chars left)</span>`;
+        } else {
+            helpText.textContent = originalText;
+        }
+    });
+}
+
+// Add character counters
+addCharacterCounter('title', 200);
+
+// Auto-focus first field
+document.getElementById('title').focus();
+
+// Preview functionality for JLPT level
+document.getElementById('jlpt_level').addEventListener('change', function() {
+    const level = this.value;
+    const descriptions = {
+        'N5': 'Beginner level - Basic hiragana, katakana, and ~100 kanji',
+        'N4': 'Elementary level - Basic conversation and ~300 kanji',
+        'N3': 'Intermediate level - Everyday situations and ~650 kanji',
+        'N2': 'Upper intermediate level - Various circumstances and ~1000 kanji',
+        'N1': 'Advanced level - Complex and abstract topics and 2000+ kanji'
+    };
+    
+    if (descriptions[level]) {
+        const helpText = this.nextElementSibling;
+        helpText.innerHTML = descriptions[level];
+        helpText.style.color = '#667eea';
+        helpText.style.fontWeight = '500';
+    }
+});
+
+// Add smooth animations
+document.querySelectorAll('.form-control').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'translateY(-2px)';
+        this.parentElement.style.transition = 'transform 0.3s ease';
+    });
+    
+    input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'translateY(0)';
+    });
+});
+</script>
+{% endblock %}

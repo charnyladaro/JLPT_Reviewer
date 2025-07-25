@@ -1,0 +1,1427 @@
+{% extends "base.html" %}
+
+{% block title %}Master Japanese with JLPT Study System{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #fff;
+        color: #333;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="70" cy="80" r="2" fill="rgba(255,255,255,0.05)"/></svg>');
+        animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-text {
+        animation: slideInLeft 1s ease-out;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(45deg, #ffffff, #f0f8ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .hero-features {
+        list-style: none;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-features li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+    }
+
+    .hero-features li i {
+        color: #4ade80;
+        margin-right: 0.8rem;
+        font-size: 1.2rem;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-hero-primary:hover {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-hero-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 1rem 2rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        text-decoration: none;
+    }
+
+    .hero-visual {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: slideInRight 1s ease-out;
+    }
+
+    .hero-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transform: perspective(1000px) rotateY(-15deg);
+        transition: transform 0.3s ease;
+    }
+
+    .hero-card:hover {
+        transform: perspective(1000px) rotateY(0deg);
+    }
+
+    /* Trust Indicators */
+    .trust-section {
+        background: #f8fafc;
+        padding: 3rem 0;
+        text-align: center;
+    }
+
+    .trust-stats {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        padding: 0 2rem;
+    }
+
+    .trust-stat {
+        padding: 1.5rem;
+    }
+
+    .trust-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .trust-label {
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 5rem 0;
+        background: white;
+    }
+
+    .section-header {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 4rem;
+        padding: 0 2rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .features-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 3rem;
+        padding: 0 2rem;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #f1f5f9;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.15);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .feature-description {
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-link {
+        color: #667eea;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-link:hover {
+        color: #5a67d8;
+        text-decoration: none;
+        transform: translateX(5px);
+    }
+
+    /* Courses Preview Section */
+    .courses-preview {
+        background: #f8fafc;
+        padding: 5rem 0;
+    }
+
+    .courses-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .course-preview-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .course-preview-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .course-image {
+        height: 180px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        position: relative;
+    }
+
+    .course-level-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        color: #667eea;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    .course-content {
+        padding: 1.5rem;
+    }
+
+    .course-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .course-instructor {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .course-stats {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .course-level-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .course-students {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .course-availability {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #10b981;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        padding: 5rem 0;
+        color: white;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .cta-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .cta-subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Testimonials */
+    .testimonials-section {
+        padding: 5rem 0;
+        background: white;
+    }
+
+    .testimonials-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 0 2rem;
+    }
+
+    .testimonial-card {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 2rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+    }
+
+    .testimonial-text {
+        font-style: italic;
+        color: #475569;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .testimonial-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .testimonial-info {
+        flex: 1;
+    }
+
+    .testimonial-name {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .testimonial-role {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-content {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .hero-cta {
+            justify-content: center;
+        }
+
+        .btn-hero-primary,
+        .btn-hero-secondary {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .features-grid,
+        .courses-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .trust-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .cta-title {
+            font-size: 2rem;
+        }
+
+        .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .btn-hero-primary,
+        .btn-hero-secondary {
+            width: 100%;
+            text-align: center;
+        }
+
+        .trust-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .feature-card,
+        .testimonial-card {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Animations */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    /* Level Selection Enhancement */
+    .level-showcase {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        padding: 5rem 0;
+    }
+
+    .level-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding: 0 2rem;
+    }
+
+    .level-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    .level-card:hover {
+        transform: translateY(-10px);
+        border-color: #667eea;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+    }
+
+    .level-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .level-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .level-subtitle {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .level-features {
+        list-style: none;
+        text-align: left;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .level-features li {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .level-features li i {
+        color: #10b981;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">Master Japanese with Free JLPT Study Resources</h1>
+            <p class="hero-subtitle">Access comprehensive study materials and courses for all JLPT levels. Start your Japanese learning journey today - completely free!</p>
+            
+            <ul class="hero-features">
+                <li><i class="fas fa-check-circle"></i> N5 to N1 comprehensive courses</li>
+                <li><i class="fas fa-check-circle"></i> Interactive study materials & practice tests</li>
+                <li><i class="fas fa-check-circle"></i> Self-paced learning system</li>
+                <li><i class="fas fa-check-circle"></i> Mobile-friendly platform</li>
+            </ul>
+            
+            <div class="hero-cta">
+                {% if session.user_id %}
+                    <a href="/courses" class="btn-hero-primary">
+                        <i class="fas fa-rocket"></i> Browse Courses
+                    </a>
+                    <a href="/dashboard" class="btn-hero-secondary">
+                        <i class="fas fa-tachometer-alt"></i> My Dashboard
+                    </a>
+                {% else %}
+                    <a href="/register" class="btn-hero-primary">
+                        <i class="fas fa-user-plus"></i> Start Learning Free
+                    </a>
+                    <a href="/login" class="btn-hero-secondary">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="hero-visual">
+            <div class="hero-card">
+                <div style="text-align: center; color: white;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎌</div>
+                    <h3 style="margin-bottom: 1rem;">Free JLPT Resources</h3>
+                    <div style="font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">∞</div>
+                    <p style="opacity: 0.9;">Unlimited access to all materials</p>
+                    <div style="background: rgba(255,255,255,0.2); height: 4px; border-radius: 2px; margin-top: 1rem;">
+                        <div style="background: #4ade80; height: 100%; width: 100%; border-radius: 2px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Indicators -->
+<section class="trust-section">
+    <div class="trust-stats">
+        <div class="trust-stat">
+            <div class="trust-number">100%</div>
+            <div class="trust-label">Free Access</div>
+        </div>
+        <div class="trust-stat">
+            <div class="trust-number">5</div>
+            <div class="trust-label">JLPT Levels</div>
+        </div>
+        <div class="trust-stat">
+            <div class="trust-number">24/7</div>
+            <div class="trust-label">Available</div>
+        </div>
+    </div>
+</section>
+
+<!-- JLPT Levels Showcase -->
+<section class="level-showcase">
+    <div class="section-header">
+        <h2 class="section-title">Choose Your JLPT Level</h2>
+        <p class="section-subtitle">From beginner to advanced, we have the perfect course for your Japanese learning journey</p>
+    </div>
+    
+    <div class="level-grid">
+        <div class="level-card" onclick="window.location.href='/courses?level=N5'">
+            <div class="level-icon">🌱</div>
+            <h3 class="level-title">N5</h3>
+            <p class="level-subtitle">Beginner</p>
+            <ul class="level-features">
+                <li><i class="fas fa-check"></i> Basic hiragana & katakana</li>
+                <li><i class="fas fa-check"></i> ~100 kanji characters</li>
+                <li><i class="fas fa-check"></i> Everyday conversations</li>
+                <li><i class="fas fa-check"></i> Basic grammar patterns</li>
+            </ul>
+        </div>
+        
+        <div class="level-card" onclick="window.location.href='/courses?level=N4'">
+            <div class="level-icon">🌿</div>
+            <h3 class="level-title">N4</h3>
+            <p class="level-subtitle">Elementary</p>
+            <ul class="level-features">
+                <li><i class="fas fa-check"></i> ~300 kanji characters</li>
+                <li><i class="fas fa-check"></i> Daily life topics</li>
+                <li><i class="fas fa-check"></i> Past & present tense</li>
+                <li><i class="fas fa-check"></i> Simple conversations</li>
+            </ul>
+        </div>
+        
+        <div class="level-card" onclick="window.location.href='/courses?level=N3'">
+            <div class="level-icon">🌳</div>
+            <h3 class="level-title">N3</h3>
+            <p class="level-subtitle">Intermediate</p>
+            <ul class="level-features">
+                <li><i class="fas fa-check"></i> ~650 kanji characters</li>
+                <li><i class="fas fa-check"></i> Complex grammar</li>
+                <li><i class="fas fa-check"></i> News & articles</li>
+                <li><i class="fas fa-check"></i> Workplace communication</li>
+            </ul>
+        </div>
+        
+        <div class="level-card" onclick="window.location.href='/courses?level=N2'">
+            <div class="level-icon">🌲</div>
+            <h3 class="level-title">N2</h3>
+            <p class="level-subtitle">Upper Intermediate</p>
+            <ul class="level-features">
+                <li><i class="fas fa-check"></i> ~1000 kanji characters</li>
+                <li><i class="fas fa-check"></i> Abstract topics</li>
+                <li><i class="fas fa-check"></i> Business Japanese</li>
+                <li><i class="fas fa-check"></i> Academic texts</li>
+            </ul>
+        </div>
+        
+        <div class="level-card" onclick="window.location.href='/courses?level=N1'">
+            <div class="level-icon">🏔️</div>
+            <h3 class="level-title">N1</h3>
+            <p class="level-subtitle">Advanced</p>
+            <ul class="level-features">
+                <li><i class="fas fa-check"></i> 2000+ kanji characters</li>
+                <li><i class="fas fa-check"></i> Complex discussions</li>
+                <li><i class="fas fa-check"></i> Literary texts</li>
+                <li><i class="fas fa-check"></i> Professional fluency</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="section-header">
+        <h2 class="section-title">Why Choose Our JLPT Platform?</h2>
+        <p class="section-subtitle">Everything you need to succeed in your Japanese language journey, all in one place</p>
+    </div>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3 class="feature-title">Mobile Learning</h3>
+            <p class="feature-description">Study anywhere, anytime with our mobile-responsive platform. Perfect for busy schedules and on-the-go learning.</p>
+            <a href="/courses" class="feature-link">
+                Start Learning <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="feature-title">Learning Community</h3>
+            <p class="feature-description">Connect with fellow Japanese learners. Share experiences, ask questions, and motivate each other on your JLPT journey.</p>
+            <a href="/courses" class="feature-link">
+                Join Community <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <h3 class="feature-title">JLPT Focused</h3>
+            <p class="feature-description">All materials and courses are specifically designed to prepare you for official JLPT exams with realistic practice scenarios.</p>
+            <a href="/courses" class="feature-link">
+                Start Preparing <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="courses-preview">
+    <div class="courses-container">
+        <div class="section-header">
+            <h2 class="section-title">Featured Courses</h2>
+            <p class="section-subtitle">Start your Japanese learning journey with our most popular courses</p>
+        </div>
+        
+        <div class="courses-grid">
+            <div class="course-preview-card">
+                <div class="course-image">
+                    🌱
+                    <div class="course-level-badge">N5</div>
+                </div>
+                <div class="course-content">
+                    <h3 class="course-title">Complete JLPT N5 Preparation Course</h3>
+                    <p class="course-instructor">Beginner Level Course</p>
+                    <div class="course-stats">
+                        <div class="course-level-indicator">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Comprehensive</span>
+                        </div>
+                        <div class="course-students">
+                            <i class="fas fa-clock"></i>
+                            <span>Self-paced</span>
+                        </div>
+                    </div>
+                    <div class="course-availability">
+                        <i class="fas fa-unlock"></i> Free Access
+                    </div>
+                </div>
+            </div>
+            
+            <div class="course-preview-card">
+                <div class="course-image">
+                    🌿
+                    <div class="course-level-badge">N4</div>
+                </div>
+                <div class="course-content">
+                    <h3 class="course-title">JLPT N4 Complete Grammar & Vocabulary</h3>
+                    <p class="course-instructor">Elementary Level Course</p>
+                    <div class="course-stats">
+                        <div class="course-level-indicator">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Structured</span>
+                        </div>
+                        <div class="course-students">
+                            <i class="fas fa-clock"></i>
+                            <span>8-12 weeks</span>
+                        </div>
+                    </div>
+                    <div class="course-availability">
+                        <i class="fas fa-unlock"></i> Free Access
+                    </div>
+                </div>
+            </div>
+            
+            <div class="course-preview-card">
+                <div class="course-image">
+                    🌳
+                    <div class="course-level-badge">N3</div>
+                </div>
+                <div class="course-content">
+                    <h3 class="course-title">JLPT N3 Comprehensive Study Program</h3>
+                    <p class="course-instructor">Intermediate Level Course</p>
+                    <div class="course-stats">
+                        <div class="course-level-indicator">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Advanced</span>
+                        </div>
+                        <div class="course-students">
+                            <i class="fas fa-clock"></i>
+                            <span>12-16 weeks</span>
+                        </div>
+                    </div>
+                    <div class="course-availability">
+                        <i class="fas fa-unlock"></i> Free Access
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="/courses" class="btn-hero-primary" style="display: inline-block; margin-top: 2rem;">
+                <i class="fas fa-th-large"></i> View All Courses
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section">
+    <div class="section-header">
+        <h2 class="section-title">Why Students Choose Our Platform</h2>
+        <p class="section-subtitle">Discover what makes our JLPT study platform the perfect choice for your Japanese learning journey</p>
+    </div>
+    
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <p class="testimonial-text">"The structured approach and comprehensive materials make learning systematic and enjoyable. Perfect for self-paced study!"</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">📚</div>
+                <div class="testimonial-info">
+                    <div class="testimonial-name">Comprehensive Content</div>
+                    <div class="testimonial-role">All levels covered from N5 to N1</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="testimonial-card">
+            <p class="testimonial-text">"Having everything in one place - textbooks, audio files, and practice materials - saves so much time and makes studying efficient."</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">⚡</div>
+                <div class="testimonial-info">
+                    <div class="testimonial-name">All-in-One Platform</div>
+                    <div class="testimonial-role">Everything you need in one place</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="testimonial-card">
+            <p class="testimonial-text">"The mobile-friendly design means I can study anywhere - during commutes, lunch breaks, or at home. Total flexibility!"</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar">📱</div>
+                <div class="testimonial-info">
+                    <div class="testimonial-name">Study Anywhere</div>
+                    <div class="testimonial-role">Mobile-optimized learning</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2 class="cta-title">Ready to Master Japanese?</h2>
+        <p class="cta-subtitle">Join over 50,000 students who have successfully passed the JLPT with our proven study system. Start your journey today!</p>
+        
+        <div class="cta-buttons">
+            {% if session.user_id %}
+                <a href="/courses" class="btn-hero-primary">
+                    <i class="fas fa-graduation-cap"></i> Browse Courses
+                </a>
+                <a href="/dashboard" class="btn-hero-secondary">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </a>
+            {% else %}
+                <a href="/register" class="btn-hero-primary">
+                    <i class="fas fa-rocket"></i> Start Learning Now
+                </a>
+                <a href="/courses" class="btn-hero-secondary">
+                    <i class="fas fa-eye"></i> Preview Courses
+                </a>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 2rem; opacity: 0.8; font-size: 0.9rem;">
+            <i class="fas fa-heart"></i> Completely free • No registration required for browsing • Start learning immediately
+        </div>
+    </div>
+</section>
+
+<!-- Study Materials Quick Access -->
+<section class="features-section" style="background: #f8fafc;">
+    <div class="section-header">
+        <h2 class="section-title">Free Study Materials</h2>
+        <p class="section-subtitle">Get instant access to our extensive library of JLPT study resources</p>
+    </div>
+    
+    <div class="features-grid">
+        <div class="feature-card" onclick="showLevel('N5')" style="cursor: pointer;">
+            <div class="feature-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <h3 class="feature-title">Textbooks & Guides</h3>
+            <p class="feature-description">Comprehensive textbooks, grammar guides, and reference materials for all JLPT levels.</p>
+            <div class="feature-link">
+                Access Free Materials <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="showLevel('N5')" style="cursor: pointer;">
+            <div class="feature-icon">
+                <i class="fas fa-headphones"></i>
+            </div>
+            <h3 class="feature-title">Audio Resources</h3>
+            <p class="feature-description">Native speaker pronunciation guides, listening practice, and conversation examples.</p>
+            <div class="feature-link">
+                Listen Now <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="showLevel('N5')" style="cursor: pointer;">
+            <div class="feature-icon">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <h3 class="feature-title">Practice Tests</h3>
+            <p class="feature-description">Full-length mock exams and practice questions to test your knowledge and track progress.</p>
+            <div class="feature-link">
+                Take Practice Test <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Study Level Selection Modal Trigger -->
+<div id="level-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 600px; margin: 2rem;">
+        <h3 style="text-align: center; margin-bottom: 2rem; color: #1e293b;">Choose Your JLPT Level</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem;">
+            <button onclick="redirectToMaterials('N5')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌱</div>
+                <div style="font-weight: 600;">N5</div>
+                <div style="font-size: 0.8rem; opacity: 0.9;">Beginner</div>
+            </button>
+            <button onclick="redirectToMaterials('N4')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌿</div>
+                <div style="font-weight: 600;">N4</div>
+                <div style="font-size: 0.8rem; opacity: 0.9;">Elementary</div>
+            </button>
+            <button onclick="redirectToMaterials('N3')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌳</div>
+                <div style="font-weight: 600;">N3</div>
+                <div style="font-size: 0.8rem; opacity: 0.9;">Intermediate</div>
+            </button>
+            <button onclick="redirectToMaterials('N2')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌲</div>
+                <div style="font-weight: 600;">N2</div>
+                <div style="font-size: 0.8rem; opacity: 0.9;">Upper Inter.</div>
+            </button>
+            <button onclick="redirectToMaterials('N1')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 1rem; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏔️</div>
+                <div style="font-weight: 600;">N1</div>
+                <div style="font-size: 0.8rem; opacity: 0.9;">Advanced</div>
+            </button>
+        </div>
+        <button onclick="closeLevelModal()" style="background: #e2e8f0; border: none; padding: 0.8rem 2rem; border-radius: 8px; margin-top: 2rem; width: 100%; cursor: pointer;">
+            Cancel
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Smooth scrolling for navigation
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Animate elements on scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in-up');
+        }
+    });
+}, observerOptions);
+
+// Observe elements for animation
+document.querySelectorAll('.feature-card, .course-preview-card, .testimonial-card, .level-card').forEach(el => {
+    observer.observe(el);
+});
+
+// Course card hover effects
+document.querySelectorAll('.course-preview-card').forEach(card => {
+    card.addEventListener('click', function() {
+        // Get course level from badge
+        const levelBadge = this.querySelector('.course-level-badge');
+        if (levelBadge) {
+            const level = levelBadge.textContent.trim();
+            window.location.href = `/courses?level=${level}`;
+        }
+    });
+});
+
+// Level card click handlers
+document.querySelectorAll('.level-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Modal functions for study materials
+function showLevel(level) {
+    document.getElementById('level-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLevelModal() {
+    document.getElementById('level-modal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function redirectToMaterials(level) {
+    window.location.href = `/?level=${level}#materials`;
+}
+
+// Close modal when clicking outside
+document.getElementById('level-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLevelModal();
+    }
+});
+
+// Keyboard navigation for modal
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeLevelModal();
+    }
+});
+
+// Add hover effects to buttons
+document.querySelectorAll('button[onclick^="redirectToMaterials"]').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.05)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+});
+
+// Parallax effect for hero section
+window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const parallax = document.querySelector('.hero-section::before');
+    const speed = scrolled * 0.5;
+    
+    // Apply parallax effect to hero background
+    if (scrolled < window.innerHeight) {
+        document.querySelector('.hero-section').style.transform = `translateY(${speed}px)`;
+    }
+});
+
+// Counter animation for trust indicators
+function animateCounters() {
+    const counters = document.querySelectorAll('.trust-number');
+    
+    counters.forEach(counter => {
+        const target = counter.textContent;
+        const num = parseInt(target.replace(/[^0-9]/g, ''));
+        const suffix = target.replace(/[0-9]/g, '');
+        
+        let current = 0;
+        const increment = num / 100;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= num) {
+                counter.textContent = target;
+                clearInterval(timer);
+            } else {
+                counter.textContent = Math.floor(current) + suffix;
+            }
+        }, 20);
+    });
+}
+
+// Trigger counter animation when trust section is visible
+const trustSection = document.querySelector('.trust-section');
+const trustObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            animateCounters();
+            trustObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 });
+
+if (trustSection) {
+    trustObserver.observe(trustSection);
+}
+
+// Add loading states to CTA buttons
+document.querySelectorAll('.btn-hero-primary, .btn-hero-secondary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        // Don't add loading state for anchor links
+        if (this.tagName === 'A') return;
+        
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        this.disabled = true;
+        
+        // Restore button after 3 seconds (for demo purposes)
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+        }, 3000);
+    });
+});
+
+// Feature card click to action
+document.querySelectorAll('.feature-card .feature-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const href = this.getAttribute('href');
+        
+        // Add ripple effect
+        const ripple = document.createElement('div');
+        ripple.style.cssText = `
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        `;
+        
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        
+        this.style.position = 'relative';
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+            if (href) {
+                window.location.href = href;
+            }
+        }, 600);
+    });
+});
+
+// Add ripple animation CSS
+const rippleStyle = document.createElement('style');
+rippleStyle.textContent = `
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(rippleStyle);
+
+// Auto-play testimonial rotation (optional)
+let currentTestimonial = 0;
+const testimonials = document.querySelectorAll('.testimonial-card');
+
+function rotateTestimonials() {
+    testimonials.forEach((card, index) => {
+        card.style.transform = index === currentTestimonial ? 'scale(1.05)' : 'scale(1)';
+        card.style.opacity = index === currentTestimonial ? '1' : '0.8';
+    });
+    
+    currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+}
+
+// Start testimonial rotation every 5 seconds
+if (testimonials.length > 0) {
+    setInterval(rotateTestimonials, 5000);
+}
+
+// Add print styles
+const printStyle = document.createElement('style');
+printStyle.textContent = `
+    @media print {
+        .hero-section,
+        .cta-section,
+        nav,
+        .testimonials-section {
+            display: none !important;
+        }
+        
+        .feature-card,
+        .course-preview-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+`;
+document.head.appendChild(printStyle);
+</script>
+{% endblock %}">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3 class="feature-title">Expert Instructors</h3>
+            <p class="feature-description">Learn from certified Japanese language teachers with years of JLPT preparation experience and proven success rates.</p>
+            <a href="/courses" class="feature-link">
+                Explore Courses <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h3 class="feature-title">Comprehensive Materials</h3>
+            <p class="feature-description">Access thousands of study materials including textbooks, practice tests, audio files, and interactive exercises.</p>
+            <a href="/" class="feature-link">
+                Browse Materials <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="feature-title">Progress Tracking</h3>
+            <p class="feature-description">Monitor your learning progress with detailed analytics, personalized recommendations, and achievement milestones.</p>
+            <a href="/dashboard" class="feature-link">
+                View Dashboard <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon

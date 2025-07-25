@@ -1,0 +1,1094 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Manage Courses - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .courses-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #2c3e50;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .courses-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    .courses-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.8;
+        margin-bottom: 1rem;
+        color: #34495e;
+        font-weight: 500;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.3rem;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .view-btn {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .view-btn.active {
+        background: #667eea;
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .view-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+
+    .view-btn.active:hover {
+        background: #5a67d8;
+        color: white;
+    }
+
+    .filters-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .filters-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .search-input {
+        grid-column: 1 / -1;
+        margin-bottom: 1rem;
+    }
+
+    .courses-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Card View Styles */
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .course-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .course-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        gap: 1rem;
+    }
+
+    .course-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .course-title {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        word-wrap: break-word;
+    }
+
+    .course-instructor {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .course-level {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        text-align: center;
+        min-width: 70px;
+        flex-shrink: 0;
+    }
+
+    .course-description {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .course-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        background: rgba(102, 126, 234, 0.05);
+        padding: 0.8rem;
+        border-radius: 12px;
+    }
+
+    .meta-icon {
+        font-size: 1.2rem;
+        color: #667eea;
+        margin-bottom: 0.3rem;
+    }
+
+    .meta-value {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .meta-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .course-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 12px;
+    }
+
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-inactive {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .status-draft {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .course-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        flex: 1;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .btn-view {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-view:hover {
+        background: rgba(102, 126, 234, 0.2);
+        color: #5a67d8;
+        text-decoration: none;
+    }
+
+    .btn-edit {
+        background: rgba(255, 193, 7, 0.1);
+        color: #e67e22;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-edit:hover {
+        background: rgba(255, 193, 7, 0.2);
+        color: #d68910;
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .btn-delete:hover {
+        background: rgba(220, 53, 69, 0.2);
+        color: #c82333;
+    }
+
+    /* List View Styles */
+    .courses-list {
+        display: none;
+    }
+
+    .courses-list.active {
+        display: block;
+    }
+
+    .courses-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .courses-table th {
+        background: rgba(102, 126, 234, 0.1);
+        color: #333;
+        font-weight: bold;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .courses-table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        vertical-align: middle;
+    }
+
+    .courses-table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .table-course-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .table-course-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .table-course-details h4 {
+        color: #333;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .table-course-details p {
+        color: #666;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        color: #2c3e50;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .summary-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #667eea;
+    }
+
+    .summary-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        color: #34495e;
+        font-weight: 500;
+    }
+
+    .bulk-actions {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .bulk-actions.show {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .selected-count {
+        color: #e67e22;
+        font-weight: bold;
+    }
+
+    .checkbox-cell {
+        text-align: center;
+        width: 40px;
+    }
+
+    .course-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+        .courses-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        
+        .header-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .courses-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .course-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .course-actions {
+            width: 100%;
+        }
+        
+        .btn-small {
+            flex: 1;
+        }
+        
+        .filters-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .courses-table {
+            font-size: 0.9rem;
+        }
+        
+        .courses-table th,
+        .courses-table td {
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="courses-header">
+        <h1 class="courses-title">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Manage Courses</span>
+        </h1>
+        <p class="courses-subtitle">Create, edit, and manage all JLPT courses</p>
+    </div>
+
+    <div class="stats-summary">
+        <div class="summary-card">
+            <div class="summary-number">{{ courses|length }}</div>
+            <div class="summary-label">Total Courses</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ courses|selectattr('status', 'equalto', 'active')|list|length }}</div>
+            <div class="summary-label">Active Courses</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ courses|selectattr('status', 'equalto', 'draft')|list|length }}</div>
+            <div class="summary-label">Draft Courses</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">{{ courses|map(attribute='enrolled_count')|sum }}</div>
+            <div class="summary-label">Total Students</div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="showCardView()" id="card-btn">
+                <i class="fas fa-th-large"></i>
+                <span>Card View</span>
+            </button>
+            <button class="view-btn" onclick="showListView()" id="list-btn">
+                <i class="fas fa-list"></i>
+                <span>List View</span>
+            </button>
+        </div>
+        
+        <a href="/admin/courses/create" class="btn btn-success">
+            <i class="fas fa-plus"></i> Create New Course
+        </a>
+    </div>
+
+    <div class="filters-section">
+        <div class="form-group search-input">
+            <label for="search" class="form-label">
+                <i class="fas fa-search"></i> Search Courses
+            </label>
+            <input type="text" id="search" class="form-control" 
+                   placeholder="Search by title, instructor, or description..." 
+                   onkeyup="filterCourses()">
+        </div>
+        
+        <div class="filters-row">
+            <div class="form-group">
+                <label for="level-filter" class="form-label">Filter by Level</label>
+                <select id="level-filter" class="form-control form-select" onchange="filterCourses()">
+                    <option value="">All Levels</option>
+                    <option value="N5">N5 - Beginner</option>
+                    <option value="N4">N4 - Elementary</option>
+                    <option value="N3">N3 - Intermediate</option>
+                    <option value="N2">N2 - Upper Inter.</option>
+                    <option value="N1">N1 - Advanced</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="status-filter" class="form-label">Filter by Status</label>
+                <select id="status-filter" class="form-control form-select" onchange="filterCourses()">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="instructor-filter" class="form-label">Filter by Instructor</label>
+                <select id="instructor-filter" class="form-control form-select" onchange="filterCourses()">
+                    <option value="">All Instructors</option>
+                    {% for instructor in courses|map(attribute='instructor_name')|unique|select %}
+                    <option value="{{ instructor }}">{{ instructor }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bulk-actions" id="bulk-actions">
+        <div class="selected-count" id="selected-count">0 courses selected</div>
+        <div>
+            <button class="btn btn-warning btn-small" onclick="bulkStatusChange('active')">
+                <i class="fas fa-play"></i> Activate Selected
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="bulkStatusChange('inactive')">
+                <i class="fas fa-pause"></i> Deactivate Selected
+            </button>
+            <button class="btn btn-danger btn-small" onclick="bulkDelete()">
+                <i class="fas fa-trash"></i> Delete Selected
+            </button>
+        </div>
+    </div>
+
+    <div class="courses-container">
+        {% if courses %}
+        <!-- Card View -->
+        <div class="courses-grid" id="card-view">
+            {% for course in courses %}
+            <div class="course-card" 
+                 data-level="{{ course.jlpt_level }}" 
+                 data-status="{{ course.status }}"
+                 data-instructor="{{ course.instructor_name or '' }}"
+                 data-id="{{ course.id }}">
+                
+                <div class="course-header">
+                    <div class="course-info">
+                        <h3 class="course-title">{{ course.title }}</h3>
+                        <div class="course-instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            {{ course.instructor_name or 'No instructor assigned' }}
+                        </div>
+                    </div>
+                    <div class="course-level">{{ course.jlpt_level }}</div>
+                </div>
+
+                {% if course.description %}
+                <div class="course-description">{{ course.description }}</div>
+                {% endif %}
+
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-users"></i></div>
+                        <div class="meta-value">{{ course.enrolled_count or 0 }}</div>
+                        <div class="meta-label">Enrolled</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-clock"></i></div>
+                        <div class="meta-value">{{ course.pending_count or 0 }}</div>
+                        <div class="meta-label">Pending</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-book"></i></div>
+                        <div class="meta-value">{{ course.material_count or 0 }}</div>
+                        <div class="meta-label">Materials</div>
+                    </div>
+                    {% if course.duration_weeks %}
+                    <div class="meta-item">
+                        <div class="meta-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="meta-value">{{ course.duration_weeks }}</div>
+                        <div class="meta-label">Weeks</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="course-status">
+                    <div class="status-badge status-{{ course.status }}">
+                        <i class="fas fa-{% if course.status == 'active' %}check-circle{% elif course.status == 'inactive' %}times-circle{% else %}edit{% endif %}"></i>
+                        {{ course.status.title() }}
+                    </div>
+                    <div style="font-size: 0.8rem; color: #666;">
+                        Created {{ course.created_at[:10] if course.created_at else 'Recently' }}
+                    </div>
+                </div>
+
+                <div class="course-actions">
+                    <a href="/admin/courses/{{ course.id }}" class="btn-small btn-view">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="/admin/courses/{{ course.id }}/edit" class="btn-small btn-edit">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <button class="btn-small btn-delete" onclick="deleteCourse({{ course.id }}, '{{ course.title }}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View -->
+        <div class="courses-list" id="list-view">
+            <table class="courses-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">
+                            <input type="checkbox" id="select-all" onchange="toggleSelectAll()" class="course-checkbox">
+                        </th>
+                        <th>Course</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Students</th>
+                        <th>Materials</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="courses-tbody">
+                    {% for course in courses %}
+                    <tr data-level="{{ course.jlpt_level }}" 
+                        data-status="{{ course.status }}"
+                        data-instructor="{{ course.instructor_name or '' }}"
+                        data-id="{{ course.id }}">
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="course-checkbox row-checkbox" 
+                                   value="{{ course.id }}" onchange="updateBulkActions()">
+                        </td>
+                        <td>
+                            <div class="table-course-info">
+                                <div class="table-course-icon">
+                                    {{ course.jlpt_level }}
+                                </div>
+                                <div class="table-course-details">
+                                    <h4>{{ course.title }}</h4>
+                                    <p>{{ course.instructor_name or 'No instructor assigned' }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="course-level">{{ course.jlpt_level }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ course.status }}">
+                                {{ course.status.title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="text-align: center;">
+                                <strong>{{ course.enrolled_count or 0 }}</strong> enrolled<br>
+                                <small style="color: #666;">{{ course.pending_count or 0 }} pending</small>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <strong>{{ course.material_count or 0 }}</strong>
+                        </td>
+                        <td style="color: #666; font-size: 0.9rem;">
+                            {{ course.created_at[:10] if course.created_at else 'Recently' }}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.3rem;">
+                                <a href="/admin/courses/{{ course.id }}" class="btn-small btn-view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/admin/courses/{{ course.id }}/edit" class="btn-small btn-edit" title="Edit Course">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn-small btn-delete" onclick="deleteCourse({{ course.id }}, '{{ course.title }}')" title="Delete Course">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="no-results" style="display: none;">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h5>No courses match your criteria</h5>
+                <p>Try adjusting your filters or search terms.</p>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3>No Courses Created Yet</h3>
+            <p>Start building your JLPT course catalog by creating your first course.</p>
+            <a href="/admin/courses/create" class="btn btn-primary mt-4">
+                <i class="fas fa-plus"></i> Create First Course
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// View switching
+function showCardView() {
+    document.getElementById('card-view').style.display = 'grid';
+    document.getElementById('list-view').style.display = 'none';
+    document.getElementById('card-btn').classList.add('active');
+    document.getElementById('list-btn').classList.remove('active');
+    localStorage.setItem('admin-courses-view', 'card');
+}
+
+function showListView() {
+    document.getElementById('card-view').style.display = 'none';
+    document.getElementById('list-view').style.display = 'block';
+    document.getElementById('card-btn').classList.remove('active');
+    document.getElementById('list-btn').classList.add('active');
+    localStorage.setItem('admin-courses-view', 'list');
+}
+
+// Load saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('admin-courses-view');
+    if (savedView === 'list') {
+        showListView();
+    } else {
+        showCardView();
+    }
+});
+
+// Filter courses
+function filterCourses() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const levelFilter = document.getElementById('level-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    const instructorFilter = document.getElementById('instructor-filter').value;
+    
+    const cardItems = document.querySelectorAll('.course-card');
+    const listRows = document.querySelectorAll('#courses-tbody tr');
+    let visibleCount = 0;
+    
+    // Filter card view
+    cardItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const level = item.dataset.level;
+        const status = item.dataset.status;
+        const instructor = item.dataset.instructor;
+        
+        const matchesSearch = !search || text.includes(search);
+        const matchesLevel = !levelFilter || level === levelFilter;
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesInstructor = !instructorFilter || instructor === instructorFilter;
+        
+        if (matchesSearch && matchesLevel && matchesStatus && matchesInstructor) {
+            row.style.display = '';
+            if (document.getElementById('card-view').style.display === 'none') {
+                visibleCount++;
+            }
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('no-results');
+    const cardView = document.getElementById('card-view');
+    const listView = document.getElementById('list-view');
+    
+    const totalItems = cardItems.length || listRows.length;
+    if (visibleCount === 0 && totalItems > 0) {
+        noResults.style.display = 'block';
+        cardView.style.display = 'none';
+        listView.style.display = 'none';
+    } else {
+        noResults.style.display = 'none';
+        if (document.getElementById('card-btn').classList.contains('active')) {
+            cardView.style.display = 'grid';
+            listView.style.display = 'none';
+        } else {
+            cardView.style.display = 'none';
+            listView.style.display = 'block';
+        }
+    }
+}
+
+// Clear filters
+function clearFilters() {
+    document.getElementById('search').value = '';
+    document.getElementById('level-filter').value = '';
+    document.getElementById('status-filter').value = '';
+    document.getElementById('instructor-filter').value = '';
+    filterCourses();
+}
+
+// Select all functionality
+function toggleSelectAll() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        if (checkbox.closest('tr').style.display !== 'none') {
+            checkbox.checked = selectAll.checked;
+        }
+    });
+    
+    updateBulkActions();
+}
+
+// Update bulk actions
+function updateBulkActions() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    const bulkActions = document.getElementById('bulk-actions');
+    const selectedCount = document.getElementById('selected-count');
+    
+    const count = checkboxes.length;
+    selectedCount.textContent = `${count} course${count !== 1 ? 's' : ''} selected`;
+    
+    if (count > 0) {
+        bulkActions.classList.add('show');
+    } else {
+        bulkActions.classList.remove('show');
+    }
+}
+
+// Delete course
+function deleteCourse(id, title) {
+    if (confirm(`Are you sure you want to delete "${title}"?\n\nThis will also remove all enrollments and course materials associations. This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/courses/${id}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Bulk status change
+function bulkStatusChange(newStatus) {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    const count = checkboxes.length;
+    
+    if (count === 0) return;
+    
+    const statusText = newStatus === 'active' ? 'activate' : 'deactivate';
+    if (confirm(`Are you sure you want to ${statusText} ${count} selected course${count !== 1 ? 's' : ''}?`)) {
+        const courseIds = Array.from(checkboxes).map(cb => cb.value);
+        
+        // Send bulk update request
+        fetch('/admin/courses/bulk-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                course_ids: courseIds,
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating courses: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error updating courses: ' + error.message);
+        });
+    }
+}
+
+// Bulk delete
+function bulkDelete() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    const count = checkboxes.length;
+    
+    if (count === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${count} selected course${count !== 1 ? 's' : ''}?\n\nThis will also remove all enrollments and course materials associations. This action cannot be undone.`)) {
+        const courseIds = Array.from(checkboxes).map(cb => cb.value);
+        
+        // Send bulk delete request
+        fetch('/admin/courses/bulk-delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                course_ids: courseIds
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting courses: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error deleting courses: ' + error.message);
+        });
+    }
+}
+
+// Auto-focus search
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('search').focus();
+    
+    // Add animations to cards
+    const courseCards = document.querySelectorAll('.course-card');
+    courseCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'fadeInUp 0.6s ease forwards';
+    });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+N: New course
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        window.location.href = '/admin/courses/create';
+    }
+    
+    // Ctrl+1: Card view
+    if (e.ctrlKey && e.key === '1') {
+        e.preventDefault();
+        showCardView();
+    }
+    
+    // Ctrl+2: List view
+    if (e.ctrlKey && e.key === '2') {
+        e.preventDefault();
+        showListView();
+    }
+    
+    // Escape: Clear filters
+    if (e.key === 'Escape') {
+        clearFilters();
+    }
+});
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .course-card {
+        opacity: 0;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %} || level === levelFilter;
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesInstructor = !instructorFilter || instructor === instructorFilter;
+        
+        if (matchesSearch && matchesLevel && matchesStatus && matchesInstructor) {
+            item.style.display = '';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Filter list view
+    listRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const level = row.dataset.level;
+        const status = row.dataset.status;
+        const instructor = row.dataset.instructor;
+        
+        const matchesSearch = !search || text.includes(search);
+        const matchesLevel = !levelFilter

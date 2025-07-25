@@ -1,0 +1,1447 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Manage Enrollments - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .enrollments-header {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        color: #2c3e50;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .enrollments-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #e74c3c);
+    }
+
+    .enrollments-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: #2c3e50;
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .enrollments-title i {
+        color: #667eea;
+        filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+        -webkit-text-fill-color: #667eea;
+    }
+
+    .enrollments-subtitle {
+        font-size: 1.1rem;
+        color: #34495e;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.3rem;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .view-btn {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .view-btn.active {
+        background: #667eea;
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .view-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+
+    .view-btn.active:hover {
+        background: #5a67d8;
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        color: #2c3e50;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        color: #34495e;
+        font-weight: 500;
+    }
+
+    .stat-pending {
+        background: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.3);
+        border: 2px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .stat-pending .stat-number {
+        color: #e67e22;
+    }
+
+    .stat-approved {
+        background: rgba(72, 187, 120, 0.1);
+        border-color: rgba(72, 187, 120, 0.3);
+        border: 2px solid rgba(72, 187, 120, 0.3);
+    }
+
+    .stat-approved .stat-number {
+        color: #27ae60;
+    }
+
+    .stat-rejected {
+        background: rgba(245, 101, 101, 0.1);
+        border-color: rgba(245, 101, 101, 0.3);
+        border: 2px solid rgba(245, 101, 101, 0.3);
+    }
+
+    .stat-rejected .stat-number {
+        color: #e74c3c;
+    }
+
+    .filters-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .filters-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .enrollments-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Card View Styles */
+    .enrollments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .enrollment-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .enrollment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .enrollment-card.pending::before {
+        background: linear-gradient(90deg, #ffc107, #e0a800);
+    }
+
+    .enrollment-card.approved::before {
+        background: linear-gradient(90deg, #28a745, #20c997);
+    }
+
+    .enrollment-card.rejected::before {
+        background: linear-gradient(90deg, #dc3545, #c82333);
+    }
+
+    .enrollment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .student-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .student-details h5 {
+        margin-bottom: 0.25rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .student-details .text-muted {
+        font-size: 0.9rem;
+    }
+
+    .course-info {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .course-title {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .level-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.25rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #e67e22;
+        border: 2px solid rgba(255, 193, 7, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    .status-approved {
+        background: rgba(72, 187, 120, 0.1);
+        color: #2f855a;
+        border: 2px solid rgba(72, 187, 120, 0.3);
+    }
+
+    .status-rejected {
+        background: rgba(245, 101, 101, 0.1);
+        color: #c53030;
+        border: 2px solid rgba(245, 101, 101, 0.3);
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+
+    .enrollment-meta {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .enrollment-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .action-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 300px;
+    }
+
+    .action-textarea {
+        width: 100%;
+        min-width: 280px;
+        height: 60px;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        resize: vertical;
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
+    .action-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+    }
+
+    .approval-form {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .btn-approve {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .btn-approve:hover:not(:disabled) {
+        background: linear-gradient(135deg, #218838, #1ea085);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+
+    .btn-reject {
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
+        color: white;
+    }
+
+    .btn-reject:hover:not(:disabled) {
+        background: linear-gradient(135deg, #c82333, #c0392b);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .btn-contact {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-contact:hover {
+        background: rgba(102, 126, 234, 0.15);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #667eea;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* List View Styles */
+    .enrollments-list {
+        display: none;
+    }
+
+    .enrollments-list.active {
+        display: block;
+    }
+
+    .enrollments-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .enrollments-table th {
+        background: rgba(102, 126, 234, 0.1);
+        color: #333;
+        font-weight: bold;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .enrollments-table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        vertical-align: middle;
+    }
+
+    .enrollments-table tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .table-enrollment-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .table-student-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .table-student-details h4 {
+        color: #333;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .table-student-details p {
+        color: #666;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .quick-actions {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #2c3e50;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-actions h6 {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .quick-btn {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .quick-btn:hover {
+        background: rgba(102, 126, 234, 0.2);
+        color: #5a67d8;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.3;
+    }
+
+    /* Enhanced animation and readability */
+    .enrollments-header {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .enrollments-header * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    @media (max-width: 768px) {
+        .enrollments-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        
+        .header-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .enrollments-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .enrollment-actions {
+            flex-direction: column;
+        }
+        
+        .action-form {
+            min-width: 100%;
+        }
+        
+        .action-textarea {
+            min-width: 100%;
+        }
+        
+        .filters-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .enrollment-meta {
+            grid-template-columns: 1fr;
+        }
+        
+        .enrollments-table {
+            font-size: 0.9rem;
+        }
+        
+        .enrollments-table th,
+        .enrollments-table td {
+            padding: 0.5rem;
+        }
+        
+        .table-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="enrollments-header">
+        <h1 class="enrollments-title">
+            <i class="fas fa-user-graduate"></i>
+            <span>Manage Enrollments</span>
+        </h1>
+        <p class="enrollments-subtitle">Review and approve student enrollment requests</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card stat-pending">
+            <div class="stat-number">{{ enrollments|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+            <div class="stat-label">Pending Approval</div>
+        </div>
+        <div class="stat-card stat-approved">
+            <div class="stat-number">{{ enrollments|selectattr('status', 'equalto', 'approved')|list|length }}</div>
+            <div class="stat-label">Approved Students</div>
+        </div>
+        <div class="stat-card stat-rejected">
+            <div class="stat-number">{{ enrollments|selectattr('status', 'equalto', 'rejected')|list|length }}</div>
+            <div class="stat-label">Rejected Requests</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ enrollments|length }}</div>
+            <div class="stat-label">Total Requests</div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="showCardView()" id="card-btn">
+                <i class="fas fa-th-large"></i>
+                <span>Card View</span>
+            </button>
+            <button class="view-btn" onclick="showListView()" id="list-btn">
+                <i class="fas fa-list"></i>
+                <span>List View</span>
+            </button>
+        </div>
+        
+        {% if enrollments|selectattr('status', 'equalto', 'pending')|list|length > 0 %}
+        <div class="quick-actions">
+            <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+            <button class="quick-btn" onclick="approveAll()" title="Approve all pending enrollments">
+                <i class="fas fa-check-double"></i> Approve All Pending
+            </button>
+            <button class="quick-btn" onclick="showBulkReject()" title="Bulk reject with reason">
+                <i class="fas fa-times-circle"></i> Bulk Reject
+            </button>
+            <a href="#pending-section" class="quick-btn">
+                <i class="fas fa-arrow-down"></i> Jump to Pending
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="filters-section">
+        <div class="filters-row">
+            <div class="form-group">
+                <label for="status-filter" class="form-label">Filter by Status</label>
+                <select id="status-filter" class="form-control form-select" onchange="filterEnrollments()">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="course-filter" class="form-label">Filter by Course</label>
+                <select id="course-filter" class="form-control form-select" onchange="filterEnrollments()">
+                    <option value="">All Courses</option>
+                    {% for course in enrollments|map(attribute='course_title')|unique %}
+                    <option value="{{ course }}">{{ course }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="search" class="form-label">Search Students</label>
+                <input type="text" id="search" class="form-control" 
+                       placeholder="Search by name or email..." onkeyup="filterEnrollments()">
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="enrollments-container">
+        {% if enrollments %}
+        <div id="pending-section">
+            {% set pending_enrollments = enrollments|selectattr('status', 'equalto', 'pending')|list %}
+            {% if pending_enrollments %}
+            <h4 style="color: #e67e22; margin-bottom: 2rem;">
+                <i class="fas fa-clock"></i> Pending Approvals ({{ pending_enrollments|length }})
+            </h4>
+            {% endif %}
+        </div>
+
+        <!-- Card View -->
+        <div class="enrollments-grid" id="card-view">
+            {% for enrollment in enrollments %}
+            <div class="enrollment-card {{ enrollment.status }}" 
+                 data-status="{{ enrollment.status }}" 
+                 data-course="{{ enrollment.course_title }}"
+                 data-student="{{ enrollment.full_name }} {{ enrollment.username }} {{ enrollment.email }}">
+                
+                <div class="card-header">
+                    <div class="student-info">
+                        <div class="student-avatar">
+                            {{ enrollment.username[0].upper() }}
+                        </div>
+                        <div class="student-details">
+                            <h5>{{ enrollment.full_name or enrollment.username }}</h5>
+                            <div class="text-muted">
+                                <i class="fas fa-user"></i> {{ enrollment.username }} | 
+                                <i class="fas fa-envelope"></i> {{ enrollment.email }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="enrollment-status">
+                        <span class="status-badge status-{{ enrollment.status }}">
+                            <i class="fas fa-{% if enrollment.status == 'pending' %}clock{% elif enrollment.status == 'approved' %}check{% else %}times{% endif %}"></i>
+                            {{ enrollment.status.title() }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="course-info">
+                    <div class="course-title">
+                        <span class="level-badge">{{ enrollment.jlpt_level }}</span>
+                        <span>{{ enrollment.course_title }}</span>
+                    </div>
+                </div>
+
+                <div class="enrollment-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Requested: {{ enrollment.enrolled_at[:10] if enrollment.enrolled_at else 'Unknown' }}</span>
+                    </div>
+                    {% if enrollment.approved_at %}
+                    <div class="meta-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Processed: {{ enrollment.approved_at[:10] }}</span>
+                    </div>
+                    {% endif %}
+                    {% if enrollment.approved_by_name %}
+                    <div class="meta-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>By: {{ enrollment.approved_by_name }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if enrollment.notes %}
+                <div class="approval-form">
+                    <strong><i class="fas fa-sticky-note"></i> Admin Notes:</strong>
+                    <p style="margin: 0.5rem 0 0 0; font-style: italic; color: #666;">{{ enrollment.notes }}</p>
+                </div>
+                {% endif %}
+
+                {% if enrollment.status == 'pending' %}
+                <div class="enrollment-actions">
+                    <div class="action-form">
+                        <form method="POST" action="{{ url_for('admin_approve_enrollment', enrollment_id=enrollment.id) }}" 
+                              onsubmit="handleFormSubmit(event, this)">
+                            <textarea name="notes" placeholder="Add approval notes (optional)" 
+                                    class="action-textarea"></textarea>
+                            <button type="submit" class="action-btn btn-approve">
+                                <i class="fas fa-check"></i> Approve Enrollment
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="action-form">
+                        <form method="POST" action="{{ url_for('admin_reject_enrollment', enrollment_id=enrollment.id) }}" 
+                              onsubmit="handleFormSubmit(event, this)">
+                            <textarea name="notes" placeholder="Reason for rejection (recommended)" 
+                                    class="action-textarea"></textarea>
+                            <button type="submit" class="action-btn btn-reject">
+                                <i class="fas fa-times"></i> Reject Enrollment
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="action-form">
+                        <a href="mailto:{{ enrollment.email }}?subject=Regarding your JLPT course enrollment&body=Hello {{ enrollment.full_name or enrollment.username }},%0D%0A%0D%0ARegarding your enrollment request for {{ enrollment.course_title }}..." 
+                           class="action-btn btn-contact">
+                            <i class="fas fa-envelope"></i> Contact Student
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View -->
+        <div class="enrollments-list" id="list-view">
+            <table class="enrollments-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="enrollments-tbody">
+                    {% for enrollment in enrollments %}
+                    <tr data-status="{{ enrollment.status }}" 
+                        data-course="{{ enrollment.course_title }}"
+                        data-student="{{ enrollment.full_name }} {{ enrollment.username }} {{ enrollment.email }}">
+                        <td>
+                            <div class="table-enrollment-info">
+                                <div class="table-student-icon">
+                                    {{ enrollment.username[0].upper() }}
+                                </div>
+                                <div class="table-student-details">
+                                    <h4>{{ enrollment.full_name or enrollment.username }}</h4>
+                                    <p>{{ enrollment.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ enrollment.course_title }}</strong>
+                                {% if enrollment.notes %}
+                                <br><small style="color: #666; font-style: italic;">{{ enrollment.notes[:50] }}{% if enrollment.notes|length > 50 %}...{% endif %}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="level-badge">{{ enrollment.jlpt_level }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ enrollment.status }}">
+                                <i class="fas fa-{% if enrollment.status == 'pending' %}clock{% elif enrollment.status == 'approved' %}check{% else %}times{% endif %}"></i>
+                                {{ enrollment.status.title() }}
+                            </span>
+                        </td>
+                        <td style="color: #666; font-size: 0.9rem;">
+                            {{ enrollment.enrolled_at[:10] if enrollment.enrolled_at else 'Unknown' }}<br>
+                            {% if enrollment.approved_at %}
+                            <small>Processed: {{ enrollment.approved_at[:10] }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if enrollment.status == 'pending' %}
+                            <div class="table-actions">
+                                <form method="POST" action="{{ url_for('admin_approve_enrollment', enrollment_id=enrollment.id) }}" 
+                                      style="display: inline;" onsubmit="handleFormSubmit(event, this)">
+                                    <input type="hidden" name="notes" value="Quick approval from list view">
+                                    <button type="submit" class="btn btn-success btn-sm" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('admin_reject_enrollment', enrollment_id=enrollment.id) }}" 
+                                      style="display: inline;" onsubmit="handleFormSubmit(event, this)">
+                                    <input type="hidden" name="notes" value="Quick rejection from list view">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                                <a href="mailto:{{ enrollment.email }}" class="btn btn-info btn-sm" title="Contact">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="table-actions">
+                                <button class="btn btn-secondary btn-sm" disabled title="{{ enrollment.status.title() }}">
+                                    <i class="fas fa-{% if enrollment.status == 'approved' %}check{% else %}times{% endif %}"></i>
+                                </button>
+                                {% if enrollment.approved_by_name %}
+                                <small style="color: #666;">by {{ enrollment.approved_by_name }}</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="no-results" style="display: none;">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h5>No enrollments match your criteria</h5>
+                <p>Try adjusting your filters or search terms.</p>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3>No Enrollment Requests</h3>
+            <p>Student enrollment requests will appear here when they apply for courses.</p>
+            <a href="{{ url_for('admin_courses') }}" class="btn btn-primary mt-4">
+                <i class="fas fa-graduation-cap"></i> Manage Courses
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bulk Reject Modal -->
+<div id="bulkRejectModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; padding: 2rem;">
+    <div style="background: white; max-width: 500px; margin: 5% auto; padding: 2rem; border-radius: 15px;">
+        <h5><i class="fas fa-times-circle"></i> Bulk Reject Pending Enrollments</h5>
+        <p>This will reject all pending enrollment requests. Please provide a reason:</p>
+        <form id="bulkRejectForm" onsubmit="handleBulkReject(event)">
+            <textarea id="bulkRejectReason" placeholder="Reason for rejection (required)" 
+                    style="width: 100%; height: 100px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1rem;" required></textarea>
+            <div style="text-align: right;">
+                <button type="button" onclick="hideBulkReject()" class="btn btn-secondary me-2">Cancel</button>
+                <button type="submit" class="btn btn-danger">Reject All Pending</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// View switching functions
+function showCardView() {
+    document.getElementById('card-view').style.display = 'grid';
+    document.getElementById('list-view').style.display = 'none';
+    document.getElementById('card-btn').classList.add('active');
+    document.getElementById('list-btn').classList.remove('active');
+    localStorage.setItem('admin-enrollments-view', 'card');
+}
+
+function showListView() {
+    document.getElementById('card-view').style.display = 'none';
+    document.getElementById('list-view').style.display = 'block';
+    document.getElementById('card-btn').classList.remove('active');
+    document.getElementById('list-btn').classList.add('active');
+    localStorage.setItem('admin-enrollments-view', 'list');
+}
+
+// Load saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('admin-enrollments-view');
+    if (savedView === 'list') {
+        showListView();
+    } else {
+        showCardView();
+    }
+    
+    // Auto-focus search when page loads
+    const searchField = document.getElementById('search');
+    if (searchField) {
+        searchField.focus();
+    }
+    
+    // Highlight pending enrollments with a subtle animation
+    const pendingItems = document.querySelectorAll('.enrollment-card.pending, tr[data-status="pending"]');
+    pendingItems.forEach((item, index) => {
+        setTimeout(() => {
+            item.style.animation = 'pulse 0.5s ease';
+        }, index * 100);
+    });
+});
+
+// Enhanced form submission handling
+function handleFormSubmit(event, form) {
+    event.preventDefault();
+    
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalContent = submitButton.innerHTML;
+    const isApproval = submitButton.classList.contains('btn-approve') || submitButton.classList.contains('btn-success');
+    
+    // Get student and course info from the enrollment item
+    const enrollmentItem = form.closest('.enrollment-card, tr');
+    let studentName, courseName;
+    
+    if (enrollmentItem.classList.contains('enrollment-card')) {
+        studentName = enrollmentItem.querySelector('.student-details h5').textContent;
+        courseName = enrollmentItem.querySelector('.course-title span:last-child').textContent;
+    } else {
+        studentName = enrollmentItem.querySelector('.table-student-details h4').textContent;
+        courseName = enrollmentItem.querySelector('td:nth-child(2) strong').textContent;
+    }
+    
+    // Confirm action
+    const action = isApproval ? 'approve' : 'reject';
+    const message = `Are you sure you want to ${action} enrollment for ${studentName} in "${courseName}"?`;
+    
+    if (!confirm(message)) {
+        return false;
+    }
+    
+    // Show loading state
+    submitButton.disabled = true;
+    submitButton.classList.add('btn-loading');
+    submitButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isApproval ? 'Approving...' : 'Rejecting...'}`;
+    
+    // Submit form
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Success - reload page to show updated status
+            window.location.reload();
+        } else {
+            throw new Error('Network response was not ok');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Reset button state on error
+        submitButton.disabled = false;
+        submitButton.classList.remove('btn-loading');
+        submitButton.innerHTML = originalContent;
+        alert('An error occurred. Please try again.');
+    });
+    
+    return false;
+}
+
+// Filter enrollments
+function filterEnrollments() {
+    const statusFilter = document.getElementById('status-filter').value;
+    const courseFilter = document.getElementById('course-filter').value;
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    
+    const cardItems = document.querySelectorAll('.enrollment-card');
+    const listRows = document.querySelectorAll('#enrollments-tbody tr');
+    let visibleCount = 0;
+    
+    // Filter card view
+    cardItems.forEach(item => {
+        const status = item.dataset.status;
+        const course = item.dataset.course;
+        const student = item.dataset.student.toLowerCase();
+        
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesCourse = !courseFilter || course === courseFilter;
+        const matchesSearch = !searchTerm || student.includes(searchTerm);
+        
+        if (matchesStatus && matchesCourse && matchesSearch) {
+            item.style.display = '';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Filter list view
+    listRows.forEach(row => {
+        const status = row.dataset.status;
+        const course = row.dataset.course;
+        const student = row.dataset.student.toLowerCase();
+        
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesCourse = !courseFilter || course === courseFilter;
+        const matchesSearch = !searchTerm || student.includes(searchTerm);
+        
+        if (matchesStatus && matchesCourse && matchesSearch) {
+            row.style.display = '';
+            if (document.getElementById('list-view').style.display !== 'none') {
+                visibleCount++;
+            }
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('no-results');
+    const cardView = document.getElementById('card-view');
+    const listView = document.getElementById('list-view');
+    
+    const totalItems = cardItems.length || listRows.length;
+    if (visibleCount === 0 && totalItems > 0) {
+        noResults.style.display = 'block';
+        cardView.style.display = 'none';
+        listView.style.display = 'none';
+    } else {
+        noResults.style.display = 'none';
+        if (document.getElementById('card-btn').classList.contains('active')) {
+            cardView.style.display = 'grid';
+            listView.style.display = 'none';
+        } else {
+            cardView.style.display = 'none';
+            listView.style.display = 'block';
+        }
+    }
+}
+
+// Clear filters
+function clearFilters() {
+    document.getElementById('status-filter').value = '';
+    document.getElementById('course-filter').value = '';
+    document.getElementById('search').value = '';
+    filterEnrollments();
+}
+
+// Bulk actions
+function approveAll() {
+    const pendingEnrollments = document.querySelectorAll('.enrollment-card.pending, tr[data-status="pending"]');
+    const count = pendingEnrollments.length;
+    
+    if (count === 0) {
+        alert('No pending enrollments to approve.');
+        return;
+    }
+    
+    if (confirm(`Approve all ${count} pending enrollment requests?\n\nThis action cannot be undone.`)) {
+        // Process each pending enrollment
+        let processed = 0;
+        pendingEnrollments.forEach((enrollment, index) => {
+            let approveForm;
+            if (enrollment.classList.contains('enrollment-card')) {
+                approveForm = enrollment.querySelector('form[action*="approve"]');
+            } else {
+                approveForm = enrollment.querySelector('form[action*="approve"]');
+            }
+            
+            if (approveForm) {
+                // Add a note for bulk approval
+                const notesField = approveForm.querySelector('textarea[name="notes"], input[name="notes"]');
+                if (notesField && !notesField.value.trim()) {
+                    notesField.value = 'Bulk approved by admin';
+                }
+                
+                // Submit form with delay to avoid overwhelming the server
+                setTimeout(() => {
+                    fetch(approveForm.action, {
+                        method: 'POST',
+                        body: new FormData(approveForm)
+                    })
+                    .then(response => {
+                        processed++;
+                        if (processed === count) {
+                            // All processed, reload page
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error processing enrollment:', error);
+                        processed++;
+                        if (processed === count) {
+                            window.location.reload();
+                        }
+                    });
+                }, index * 500); // 500ms delay between each request
+            }
+        });
+    }
+}
+
+function showBulkReject() {
+    const pendingCount = document.querySelectorAll('.enrollment-card.pending, tr[data-status="pending"]').length;
+    if (pendingCount === 0) {
+        alert('No pending enrollments to reject.');
+        return;
+    }
+    document.getElementById('bulkRejectModal').style.display = 'block';
+}
+
+function hideBulkReject() {
+    document.getElementById('bulkRejectModal').style.display = 'none';
+    document.getElementById('bulkRejectReason').value = '';
+}
+
+// Handle bulk reject form
+function handleBulkReject(event) {
+    event.preventDefault();
+    
+    const reason = document.getElementById('bulkRejectReason').value.trim();
+    if (!reason) {
+        alert('Please provide a reason for rejection.');
+        return;
+    }
+    
+    const pendingEnrollments = document.querySelectorAll('.enrollment-card.pending, tr[data-status="pending"]');
+    const count = pendingEnrollments.length;
+    
+    if (confirm(`Reject all ${count} pending enrollments with reason: "${reason}"?\n\nThis action cannot be undone.`)) {
+        // Process each pending enrollment
+        let processed = 0;
+        pendingEnrollments.forEach((enrollment, index) => {
+            let rejectForm;
+            if (enrollment.classList.contains('enrollment-card')) {
+                rejectForm = enrollment.querySelector('form[action*="reject"]');
+            } else {
+                rejectForm = enrollment.querySelector('form[action*="reject"]');
+            }
+            
+            if (rejectForm) {
+                const notesField = rejectForm.querySelector('textarea[name="notes"], input[name="notes"]');
+                if (notesField) {
+                    notesField.value = reason;
+                }
+                
+                // Submit form with delay to avoid overwhelming the server
+                setTimeout(() => {
+                    fetch(rejectForm.action, {
+                        method: 'POST',
+                        body: new FormData(rejectForm)
+                    })
+                    .then(response => {
+                        processed++;
+                        if (processed === count) {
+                            // All processed, close modal and reload page
+                            hideBulkReject();
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error processing enrollment:', error);
+                        processed++;
+                        if (processed === count) {
+                            hideBulkReject();
+                            window.location.reload();
+                        }
+                    });
+                }, index * 500); // 500ms delay between each request
+            }
+        });
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+1: Card view
+    if (e.ctrlKey && e.key === '1') {
+        e.preventDefault();
+        showCardView();
+    }
+    
+    // Ctrl+2: List view
+    if (e.ctrlKey && e.key === '2') {
+        e.preventDefault();
+        showListView();
+    }
+    
+    // Ctrl+A: Approve all pending
+    if (e.ctrlKey && e.key === 'a') {
+        e.preventDefault();
+        approveAll();
+    }
+    
+    // Ctrl+R: Show bulk reject
+    if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        showBulkReject();
+    }
+    
+    // Escape: Close modal
+    if (e.key === 'Escape') {
+        hideBulkReject();
+    }
+});
+
+// Auto-refresh every 30 seconds for pending enrollments
+let autoRefreshInterval = setInterval(() => {
+    const pendingCount = document.querySelectorAll('.enrollment-card.pending, tr[data-status="pending"]').length;
+    if (pendingCount > 0) {
+        // Only refresh if user is not actively typing or interacting
+        const activeElement = document.activeElement;
+        if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA' && activeElement.tagName !== 'SELECT')) {
+            // Check if any forms are being submitted
+            const loadingButtons = document.querySelectorAll('.btn-loading');
+            if (loadingButtons.length === 0) {
+                window.location.reload();
+            }
+        }
+    } else {
+        // Clear interval if no pending enrollments
+        clearInterval(autoRefreshInterval);
+    }
+}, 30000);
+
+// Add visual feedback for form interactions
+document.querySelectorAll('.action-textarea').forEach(textarea => {
+    textarea.addEventListener('focus', function() {
+        this.style.borderColor = '#667eea';
+        this.style.boxShadow = '0 0 0 2px rgba(102, 126, 234, 0.25)';
+    });
+    
+    textarea.addEventListener('blur', function() {
+        this.style.borderColor = '#ddd';
+        this.style.boxShadow = 'none';
+    });
+});
+
+// Prevent double submission
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const submitButton = this.querySelector('button[type="submit"]');
+        if (submitButton && submitButton.disabled) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+
+// Handle page visibility to pause auto-refresh when tab is not visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        clearInterval(autoRefreshInterval);
+    } else {
+        // Restart auto-refresh when tab becomes visible again
+        const pendingCount = document.querySelectorAll('.enrollment-card.pending, tr[data-status="pending"]').length;
+        if (pendingCount > 0) {
+            autoRefreshInterval = setInterval(() => {
+                const activeElement = document.activeElement;
+                if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA' && activeElement.tagName !== 'SELECT')) {
+                    const loadingButtons = document.querySelectorAll('.btn-loading');
+                    if (loadingButtons.length === 0) {
+                        window.location.reload();
+                    }
+                }
+            }, 30000);
+        }
+    }
+});
+
+// Add smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

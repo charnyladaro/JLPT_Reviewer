@@ -1,0 +1,784 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Course Details - {{ course.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-header {
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .course-title-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .course-title {
+        font-size: 2rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .level-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-inactive {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .status-draft {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .course-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 500;
+    }
+
+    .meta-item i {
+        width: 20px;
+        text-align: center;
+        opacity: 0.9;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .content-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+
+    .section-tabs {
+        display: flex;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 1rem 2rem;
+        border: none;
+        background: none;
+        color: #666;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-bottom: 3px solid transparent;
+    }
+
+    .tab-btn.active {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: rgba(102, 126, 234, 0.05);
+        color: #333;
+    }
+
+    .tab-content {
+        display: none;
+        padding: 2rem;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .materials-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .materials-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .material-item {
+        background: rgba(102, 126, 234, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .material-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .material-icon {
+        font-size: 2rem;
+        color: #667eea;
+        width: 50px;
+        text-align: center;
+    }
+
+    .material-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .material-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+        word-wrap: break-word;
+    }
+
+    .material-meta {
+        font-size: 0.85rem;
+        color: #666;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .material-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .enrollments-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .enrollment-item {
+        background: rgba(102, 126, 234, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .enrollment-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .enrollment-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-email {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .enrollment-meta {
+        font-size: 0.85rem;
+        color: #666;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .enrollment-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #856404;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .status-approved {
+        background: rgba(40, 167, 69, 0.2);
+        color: #155724;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-rejected {
+        background: rgba(220, 53, 69, 0.2);
+        color: #721c24;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .enrollment-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-small {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .add-material-form {
+        background: rgba(40, 167, 69, 0.05);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .course-settings-form {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #c82333, #bd2130);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .course-title-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .course-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .section-tabs {
+            flex-direction: column;
+        }
+
+        .tab-btn {
+            text-align: left;
+            justify-content: flex-start;
+        }
+
+        .material-item,
+        .enrollment-item {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .material-actions,
+        .enrollment-actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+
+        .btn-small {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Course Header -->
+    <div class="course-header">
+        <div class="course-title-section">
+            <div class="course-title">
+                <span class="level-badge">
+                    <i class="fas fa-graduation-cap"></i>
+                    {{ course.jlpt_level }}
+                </span>
+                <span>{{ course.title }}</span>
+            </div>
+            <div class="status-badge status-{{ course.status }}">
+                <i class="fas fa-{% if course.status == 'active' %}check-circle{% elif course.status == 'inactive' %}times-circle{% else %}edit{% endif %}"></i>
+                {{ course.status.title() }}
+            </div>
+        </div>
+
+        {% if course.description %}
+        <p style="margin: 1rem 0; opacity: 0.95; line-height: 1.5; color: rgba(255, 255, 255, 0.95); font-weight: 400;">{{ course.description }}</p>
+        {% endif %}
+
+        <div class="course-meta">
+            <div class="meta-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>{{ course.instructor_name or 'No instructor assigned' }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ course.duration_weeks or 'N/A' }} weeks</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-users"></i>
+                <span>{{ enrollments|selectattr('status', 'equalto', 'approved')|list|length }}{% if course.max_students %}/{{ course.max_students }}{% endif %} students</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-book"></i>
+                <span>{{ materials|length }} materials</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                <span>Created {{ course.created_at[:10] }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Tabs -->
+    <div class="content-section">
+        <div class="section-tabs">
+            <button class="tab-btn active" onclick="showTab('materials')">
+                <i class="fas fa-book"></i>
+                <span>Course Materials</span>
+                <span style="background: rgba(102, 126, 234, 0.2); color: #667eea; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; margin-left: 0.5rem;">{{ materials|length }}</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('enrollments')">
+                <i class="fas fa-user-graduate"></i>
+                <span>Enrollments</span>
+                <span style="background: rgba(102, 126, 234, 0.2); color: #667eea; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.7rem; margin-left: 0.5rem;">{{ enrollments|length }}</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Course Settings</span>
+            </button>
+        </div>
+
+        <!-- Materials Tab -->
+        <div id="materials-tab" class="tab-content active">
+            <div class="materials-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-book"></i>
+                        Course Materials
+                    </h3>
+                </div>
+
+                <!-- Add Material Form -->
+                {% if available_materials %}
+                <div class="add-material-form">
+                    <h4 style="color: #155724; margin-bottom: 1rem;">
+                        <i class="fas fa-plus-circle"></i>
+                        Add Material to Course
+                    </h4>
+                    <form method="POST" action="{{ url_for('admin_add_course_material', course_id=course.id) }}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="material_id" class="form-label">Select Material</label>
+                                <select name="material_id" id="material_id" class="form-control form-select" required>
+                                    <option value="">Choose a material...</option>
+                                    {% for material in available_materials %}
+                                    <option value="{{ material.id }}">
+                                        [{{ material.category.title() }}] {{ material.original_filename }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Add Material
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Materials List -->
+                {% if materials %}
+                <div class="materials-list">
+                    {% for material in materials %}
+                    <div class="material-item">
+                        <div class="material-icon">
+                            {% if material.category == 'books' %}
+                                <i class="fas fa-book"></i>
+                            {% elif material.category == 'reviewers' %}
+                                <i class="fas fa-file-alt"></i>
+                            {% elif material.category == 'audio' %}
+                                <i class="fas fa-file-audio"></i>
+                            {% else %}
+                                <i class="fas fa-file"></i>
+                            {% endif %}
+                        </div>
+                        <div class="material-info">
+                            <div class="material-name">{{ material.original_filename }}</div>
+                            <div class="material-meta">
+                                <span><i class="fas fa-tag"></i> {{ material.category.title() }}</span>
+                                <span><i class="fas fa-hdd"></i> {{ "%.1f"|format((material.file_size or 0) / 1024 / 1024) }} MB</span>
+                                <span><i class="fas fa-calendar"></i> {{ material.upload_date[:10] }}</span>
+                                {% if material.description %}
+                                <span><i class="fas fa-info-circle"></i> {{ material.description[:50] }}{% if material.description|length > 50 %}...{% endif %}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="material-actions">
+                            <a href="/api/view/{{ material.id }}" class="btn btn-primary btn-small" target="_blank">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_remove_course_material', course_id=course.id, course_material_id=material.course_material_id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Remove this material from the course?')">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <h4>No Materials Added</h4>
+                    <p>This course doesn't have any materials yet. Add some materials to get started.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Enrollments Tab -->
+        <div id="enrollments-tab" class="tab-content">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-user-graduate"></i>
+                    Student Enrollments
+                </h3>
+            </div>
+
+            {% if enrollments %}
+            <div class="enrollments-list">
+                {% for enrollment in enrollments %}
+                <div class="enrollment-item">
+                    <div class="user-avatar">
+                        {{ enrollment.username[0].upper() }}
+                    </div>
+                    <div class="enrollment-info">
+                        <div class="user-name">{{ enrollment.full_name or enrollment.username }}</div>
+                        <div class="user-email">{{ enrollment.email }}</div>
+                        <div class="enrollment-meta">
+                            <span><i class="fas fa-calendar-alt"></i> Enrolled: {{ enrollment.enrolled_at[:10] }}</span>
+                            {% if enrollment.approved_at %}
+                            <span><i class="fas fa-check-circle"></i> Approved: {{ enrollment.approved_at[:10] }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="enrollment-status status-{{ enrollment.status }}">
+                        {{ enrollment.status.title() }}
+                    </div>
+                    <div class="enrollment-actions">
+                        {% if enrollment.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('admin_approve_enrollment', enrollment_id=enrollment.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-success btn-small">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_reject_enrollment', enrollment_id=enrollment.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-small">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-secondary btn-small" disabled>
+                            <i class="fas fa-{% if enrollment.status == 'approved' %}check{% else %}times{% endif %}"></i>
+                            {{ enrollment.status.title() }}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h4>No Enrollments Yet</h4>
+                <p>No students have enrolled in this course yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-cog"></i>
+                    Course Settings
+                </h3>
+            </div>
+
+            <form method="POST" action="{{ url_for('admin_update_course', course_id=course.id) }}" class="course-settings-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="title" class="form-label">Course Title</label>
+                        <input type="text" id="title" name="title" class="form-control" value="{{ course.title }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jlpt_level" class="form-label">JLPT Level</label>
+                        <select id="jlpt_level" name="jlpt_level" class="form-control form-select" required>
+                            <option value="N5" {% if course.jlpt_level == 'N5' %}selected{% endif %}>N5 - Beginner</option>
+                            <option value="N4" {% if course.jlpt_level == 'N4' %}selected{% endif %}>N4 - Elementary</option>
+                            <option value="N3" {% if course.jlpt_level == 'N3' %}selected{% endif %}>N3 - Intermediate</option>
+                            <option value="N2" {% if course.jlpt_level == 'N2' %}selected{% endif %}>N2 - Upper Intermediate</option>
+                            <option value="N1" {% if course.jlpt_level == 'N1' %}selected{% endif %}>N1 - Advanced</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instructor_name" class="form-label">Instructor Name</label>
+                        <input type="text" id="instructor_name" name="instructor_name" class="form-control" value="{{ course.instructor_name or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration_weeks" class="form-label">Duration (Weeks)</label>
+                        <input type="number" id="duration_weeks" name="duration_weeks" class="form-control" value="{{ course.duration_weeks or '' }}" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="max_students" class="form-label">Max Students</label>
+                        <input type="number" id="max_students" name="max_students" class="form-control" value="{{ course.max_students or '' }}" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status" class="form-label">Course Status</label>
+                        <select id="status" name="status" class="form-control form-select" required>
+                            <option value="active" {% if course.status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if course.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="draft" {% if course.status == 'draft' %}selected{% endif %}>Draft</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Course Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="4">{{ course.description or '' }}</textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(0, 0, 0, 0.1);">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Course
+                    </button>
+                    
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteCourse()">
+                        <i class="fas fa-trash"></i> Delete Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    document.getElementById(tabName + '-tab').classList.add('active');
+    
+    // Add active class to clicked tab button
+    event.target.closest('.tab-btn').classList.add('active');
+}
+
+function confirmDeleteCourse() {
+    if (confirm('Are you sure you want to delete this course? This action cannot be undone and will remove all enrollments and associations.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("admin_delete_course", course_id=course.id) }}';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Auto-save form changes (optional)
+document.querySelectorAll('.course-settings-form input, .course-settings-form select, .course-settings-form textarea').forEach(field => {
+    field.addEventListener('change', function() {
+        // Add visual indicator that changes were made
+        const saveBtn = document.querySelector('button[type="submit"]');
+        if (saveBtn && !saveBtn.classList.contains('btn-warning')) {
+            saveBtn.classList.remove('btn-primary');
+            saveBtn.classList.add('btn-warning');
+            saveBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Save Changes';
+        }
+    });
+});
+</script>
+{% endblock %}

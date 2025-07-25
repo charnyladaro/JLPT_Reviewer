@@ -1,0 +1,482 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Upload Materials - JLPT Study System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        text-align: center;
+    }
+
+    .upload-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .upload-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .upload-form {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group-full {
+        grid-column: 1 / -1;
+    }
+
+    .file-upload-area {
+        border: 3px dashed #667eea;
+        border-radius: 15px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(102, 126, 234, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .file-upload-area:hover {
+        background: rgba(102, 126, 234, 0.1);
+        border-color: #5a67d8;
+        transform: translateY(-2px);
+    }
+
+    .file-upload-area.dragover {
+        background: rgba(102, 126, 234, 0.15);
+        border-color: #5a67d8;
+        transform: scale(1.02);
+    }
+
+    .upload-icon {
+        font-size: 4rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .upload-hint {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .selected-file {
+        background: rgba(72, 187, 120, 0.1);
+        border: 2px solid rgba(72, 187, 120, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .selected-file.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .file-icon {
+        font-size: 2rem;
+        color: #48bb78;
+    }
+
+    .file-details h4 {
+        color: #2f855a;
+        margin-bottom: 0.25rem;
+    }
+
+    .file-details p {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1.25rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 12px;
+        margin-top: 2rem;
+    }
+
+    .file-requirements {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .requirements-title {
+        color: #e67e22;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .requirements-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .requirements-list li {
+        color: #666;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .requirements-list li::before {
+        content: "✓";
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .category-info {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .progress-bar {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        height: 6px;
+        overflow: hidden;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .upload-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .upload-form {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="upload-header">
+        <h1 class="upload-title">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Upload Study Material</span>
+        </h1>
+        <p class="upload-subtitle">Add new books, reviewers, and audio files for JLPT students</p>
+    </div>
+
+    <div class="upload-form">
+        <div class="file-requirements">
+            <div class="requirements-title">
+                <i class="fas fa-info-circle"></i>
+                File Requirements
+            </div>
+            <ul class="requirements-list">
+                <li>Books: PDF, EPUB, MOBI, TXT files</li>
+                <li>Reviewers: PDF, DOC, DOCX, TXT files</li>
+                <li>Audio: MP3, WAV, M4A, OGG, FLAC files</li>
+                <li>Maximum file size: 100MB</li>
+                <li>Files will be organized by JLPT level and category</li>
+            </ul>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin_upload_file') }}" enctype="multipart/form-data" id="upload-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="jlpt_level" class="form-label">
+                        <i class="fas fa-layer-group"></i> JLPT Level
+                    </label>
+                    <select id="jlpt_level" name="jlpt_level" class="form-control form-select" required>
+                        <option value="">Select Level</option>
+                        <option value="N5">N5 - Beginner</option>
+                        <option value="N4">N4 - Elementary</option>
+                        <option value="N3">N3 - Intermediate</option>
+                        <option value="N2">N2 - Upper Intermediate</option>
+                        <option value="N1">N1 - Advanced</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="category" class="form-label">
+                        <i class="fas fa-folder"></i> Category
+                    </label>
+                    <select id="category" name="category" class="form-control form-select" required>
+                        <option value="">Select Category</option>
+                        <option value="books">📚 Books & Textbooks</option>
+                        <option value="reviewers">📝 Reviewers & Notes</option>
+                        <option value="audio">🎵 Audio Files</option>
+                    </select>
+                    <div class="category-info" id="category-info" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="form-group form-group-full">
+                <label for="description" class="form-label">
+                    <i class="fas fa-align-left"></i> Description (Optional)
+                </label>
+                <textarea id="description" name="description" class="form-control" rows="3" 
+                    placeholder="Add a description or notes about this material..."></textarea>
+            </div>
+
+            <div class="form-group form-group-full">
+                <label class="form-label">
+                    <i class="fas fa-file"></i> Select File
+                </label>
+                <div class="file-upload-area" onclick="document.getElementById('file-input').click()" 
+                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Click to browse or drag & drop your file here</div>
+                    <div class="upload-hint">Supported formats depend on the selected category</div>
+                </div>
+                <input type="file" id="file-input" name="file" class="file-input" required onchange="handleFileSelect(event)">
+                
+                <div class="selected-file" id="selected-file">
+                    <div class="file-info">
+                        <div class="file-icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div class="file-details">
+                            <h4 id="file-name"></h4>
+                            <p id="file-size"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-btn" id="submit-btn" disabled>
+                <i class="fas fa-upload"></i> Upload Material
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const categoryInfo = {
+        books: "Upload textbooks, study guides, grammar books, and other reading materials in PDF, EPUB, MOBI, or TXT format.",
+        reviewers: "Upload review materials, notes, summaries, and practice exercises in PDF, DOC, DOCX, or TXT format.",
+        audio: "Upload listening practice materials, pronunciation guides, and audio lessons in MP3, WAV, M4A, OGG, or FLAC format."
+    };
+
+    // Handle category selection
+    document.getElementById('category').addEventListener('change', function() {
+        const categoryInfoDiv = document.getElementById('category-info');
+        const selectedCategory = this.value;
+        
+        if (selectedCategory && categoryInfo[selectedCategory]) {
+            categoryInfoDiv.textContent = categoryInfo[selectedCategory];
+            categoryInfoDiv.style.display = 'block';
+        } else {
+            categoryInfoDiv.style.display = 'none';
+        }
+        
+        validateForm();
+    });
+
+    // Handle file selection
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            displaySelectedFile(file);
+            validateForm();
+        }
+    }
+
+    // Handle drag and drop
+    function handleDragOver(event) {
+        event.preventDefault();
+        event.currentTarget.classList.add('dragover');
+    }
+
+    function handleDragLeave(event) {
+        event.currentTarget.classList.remove('dragover');
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('dragover');
+        
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            const fileInput = document.getElementById('file-input');
+            fileInput.files = files;
+            displaySelectedFile(files[0]);
+            validateForm();
+        }
+    }
+
+    // Display selected file info
+    function displaySelectedFile(file) {
+        const selectedFileDiv = document.getElementById('selected-file');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const fileIcon = selectedFileDiv.querySelector('.file-icon i');
+        
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        // Update icon based on file type
+        const extension = file.name.split('.').pop().toLowerCase();
+        let iconClass = 'fas fa-file';
+        
+        if (['pdf'].includes(extension)) {
+            iconClass = 'fas fa-file-pdf';
+        } else if (['doc', 'docx'].includes(extension)) {
+            iconClass = 'fas fa-file-word';
+        } else if (['mp3', 'wav', 'm4a', 'ogg', 'flac'].includes(extension)) {
+            iconClass = 'fas fa-file-audio';
+        } else if (['txt'].includes(extension)) {
+            iconClass = 'fas fa-file-alt';
+        } else if (['epub', 'mobi'].includes(extension)) {
+            iconClass = 'fas fa-book';
+        }
+        
+        fileIcon.className = iconClass;
+        selectedFileDiv.classList.add('show');
+    }
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Validate form
+    function validateForm() {
+        const jlptLevel = document.getElementById('jlpt_level').value;
+        const category = document.getElementById('category').value;
+        const file = document.getElementById('file-input').files[0];
+        const submitBtn = document.getElementById('submit-btn');
+        
+        if (jlptLevel && category && file) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Material';
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Material';
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('upload-form').addEventListener('submit', function(event) {
+        const submitBtn = document.getElementById('submit-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        
+        // Show progress bar
+        progressBar.style.display = 'block';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        
+        // Simulate progress (in a real app, you'd track actual upload progress)
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            
+            progressFill.style.width = progress + '%';
+        }, 200);
+        
+        // Clean up on form submission
+        setTimeout(() => {
+            clearInterval(progressInterval);
+            progressFill.style.width = '100%';
+        }, 2000);
+    });
+
+    // Validate on level change
+    document.getElementById('jlpt_level').addEventListener('change', validateForm);
+
+    // Auto-focus first field
+    document.getElementById('jlpt_level').focus();
+</script>
+{% endblock %}

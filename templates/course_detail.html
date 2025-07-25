@@ -1,0 +1,837 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - JLPT Study System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-hero {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .course-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+
+    .course-info {
+        flex: 1;
+    }
+
+    .course-title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .course-instructor {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .course-level-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+        min-width: 120px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .course-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+    }
+
+    .course-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .meta-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .meta-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .meta-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+
+    .meta-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .enrollment-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .enrollment-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .status-info {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        border-radius: 15px;
+        font-weight: bold;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-enrolled {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 2px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 2px solid rgba(255, 193, 7, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    .status-rejected {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 2px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .status-available {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .status-full {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+        border: 2px solid rgba(108, 117, 125, 0.3);
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+
+    .enrollment-details {
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .enrollment-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-enroll-large {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 180px;
+        justify-content: center;
+    }
+
+    .btn-enroll-large:hover:not(.disabled) {
+        background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        text-decoration: none;
+    }
+
+    .btn-study {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 2px solid rgba(40, 167, 69, 0.2);
+    }
+
+    .btn-study:hover {
+        background: rgba(40, 167, 69, 0.15);
+        border-color: rgba(40, 167, 69, 0.3);
+        color: #28a745;
+    }
+
+    .btn-disabled {
+        background: #e9ecef;
+        color: #6c757d;
+        border: 2px solid #dee2e6;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .btn-disabled:hover {
+        transform: none;
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .materials-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .materials-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .material-item {
+        background: rgba(102, 126, 234, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .material-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .material-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .material-icon {
+        font-size: 2rem;
+        color: #667eea;
+        width: 50px;
+        text-align: center;
+    }
+
+    .material-info {
+        flex: 1;
+    }
+
+    .material-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+
+    .material-meta {
+        font-size: 0.85rem;
+        color: #666;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .material-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-material {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view-material {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-view-material:hover {
+        background: rgba(102, 126, 234, 0.15);
+        border-color: rgba(102, 126, 234, 0.3);
+        color: #5a67d8;
+        text-decoration: none;
+    }
+
+    .btn-download-material {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+
+    .btn-download-material:hover {
+        background: rgba(40, 167, 69, 0.15);
+        border-color: rgba(40, 167, 69, 0.3);
+        color: #28a745;
+        text-decoration: none;
+    }
+
+    .no-materials {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .no-materials-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .recent-students {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .students-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9rem;
+        title: attr(data-name);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        transform: translateX(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .course-title {
+            font-size: 2rem;
+        }
+
+        .course-header {
+            flex-direction: column;
+        }
+
+        .course-meta-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .enrollment-status {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .enrollment-actions {
+            flex-direction: column;
+        }
+
+        .btn-enroll-large {
+            min-width: 100%;
+        }
+
+        .material-header {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .material-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Course Hero Section -->
+    <div class="course-hero">
+        <a href="/courses" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Courses
+        </a>
+
+        <div class="course-header">
+            <div class="course-info">
+                <h1 class="course-title">{{ course.title }}</h1>
+                <div class="course-instructor">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>{{ course.instructor_name or 'No instructor assigned' }}</span>
+                </div>
+            </div>
+            <div class="course-level-badge">{{ course.jlpt_level }}</div>
+        </div>
+
+        {% if course.description %}
+        <div class="course-description">{{ course.description }}</div>
+        {% endif %}
+
+        <div class="course-meta-grid">
+            {% if course.duration_weeks %}
+            <div class="meta-card">
+                <i class="fas fa-calendar-alt meta-icon"></i>
+                <div class="meta-value">{{ course.duration_weeks }}</div>
+                <div class="meta-label">Weeks Duration</div>
+            </div>
+            {% endif %}
+
+            <div class="meta-card">
+                <i class="fas fa-users meta-icon"></i>
+                <div class="meta-value">{{ course.enrolled_count or 0 }}{% if course.max_students %}/{{ course.max_students }}{% endif %}</div>
+                <div class="meta-label">Students Enrolled</div>
+            </div>
+
+            <div class="meta-card">
+                <i class="fas fa-book meta-icon"></i>
+                <div class="meta-value">{{ materials|length }}</div>
+                <div class="meta-label">Study Materials</div>
+            </div>
+
+            <div class="meta-card">
+                <i class="fas fa-clock meta-icon"></i>
+                <div class="meta-value">{{ course.created_at[:10] if course.created_at else 'Recently' }}</div>
+                <div class="meta-label">Course Created</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrollment Status Section -->
+    <div class="enrollment-section">
+        <div class="enrollment-status">
+            <div class="status-info">
+                {% if session.user_id %}
+                    {% if user_enrollment %}
+                        {% if user_enrollment.status == 'approved' %}
+                            <div class="status-badge status-enrolled">
+                                <i class="fas fa-check-circle"></i>
+                                You are enrolled in this course!
+                            </div>
+                            <div class="enrollment-details">
+                                <strong>Enrolled:</strong> {{ user_enrollment.enrolled_at[:10] if user_enrollment.enrolled_at else 'Unknown' }}<br>
+                                <strong>Approved:</strong> {{ user_enrollment.approved_at[:10] if user_enrollment.approved_at else 'Unknown' }}
+                                {% if user_enrollment.approved_by_name %}
+                                    by {{ user_enrollment.approved_by_name }}
+                                {% endif %}
+                                {% if user_enrollment.notes %}
+                                    <br><strong>Notes:</strong> {{ user_enrollment.notes }}
+                                {% endif %}
+                            </div>
+                        {% elif user_enrollment.status == 'pending' %}
+                            <div class="status-badge status-pending">
+                                <i class="fas fa-clock"></i>
+                                Your enrollment is pending approval
+                            </div>
+                            <div class="enrollment-details">
+                                <strong>Requested:</strong> {{ user_enrollment.enrolled_at[:10] if user_enrollment.enrolled_at else 'Unknown' }}<br>
+                                Your enrollment request is being reviewed by an administrator. You will be notified once it's approved.
+                            </div>
+                        {% else %}
+                            <div class="status-badge status-rejected">
+                                <i class="fas fa-times-circle"></i>
+                                Your enrollment was not approved
+                            </div>
+                            <div class="enrollment-details">
+                                <strong>Processed:</strong> {{ user_enrollment.approved_at[:10] if user_enrollment.approved_at else 'Unknown' }}
+                                {% if user_enrollment.approved_by_name %}
+                                    by {{ user_enrollment.approved_by_name }}
+                                {% endif %}
+                                {% if user_enrollment.notes %}
+                                    <br><strong>Reason:</strong> {{ user_enrollment.notes }}
+                                {% endif %}
+                                <br>Please contact an administrator if you have questions.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        {% set spots_left = (course.max_students or 999) - (course.enrolled_count or 0) %}
+                        {% if course.max_students and spots_left <= 0 %}
+                            <div class="status-badge status-full">
+                                <i class="fas fa-users"></i>
+                                Course is full
+                            </div>
+                            <div class="enrollment-details">
+                                This course has reached its maximum capacity of {{ course.max_students }} students.
+                                Please check back later or contact us to be added to the waiting list.
+                            </div>
+                        {% else %}
+                            <div class="status-badge status-available">
+                                <i class="fas fa-user-plus"></i>
+                                Ready to enroll
+                            </div>
+                            <div class="enrollment-details">
+                                {% if course.max_students %}
+                                    <strong>{{ spots_left }}</strong> spot{{ 's' if spots_left != 1 else '' }} remaining out of {{ course.max_students }}
+                                {% else %}
+                                    Open enrollment - no student limit
+                                {% endif %}
+                                <br>Join this course to access all study materials and get instructor guidance.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <div class="status-badge status-available">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login required to enroll
+                    </div>
+                    <div class="enrollment-details">
+                        Please log in to your account to enroll in this course and access study materials.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="enrollment-actions">
+                {% if session.user_id %}
+                    {% if user_enrollment %}
+                        {% if user_enrollment.status == 'approved' %}
+                            <a href="#materials" class="btn-enroll-large btn-study">
+                                <i class="fas fa-book-open"></i>
+                                Start Studying
+                            </a>
+                        {% elif user_enrollment.status == 'pending' %}
+                            <button class="btn-enroll-large btn-disabled" disabled>
+                                <i class="fas fa-clock"></i>
+                                Awaiting Approval
+                            </button>
+                        {% else %}
+                            <button class="btn-enroll-large btn-disabled" disabled>
+                                <i class="fas fa-times"></i>
+                                Enrollment Rejected
+                            </button>
+                        {% endif %}
+                    {% elif course.max_students and (course.enrolled_count or 0) >= course.max_students %}
+                        <button class="btn-enroll-large btn-disabled" disabled>
+                            <i class="fas fa-users"></i>
+                            Course Full
+                        </button>
+                    {% else %}
+                        <form method="POST" action="/enroll/{{ course.id }}" style="display: inline;">
+                            <button type="submit" class="btn-enroll-large" onclick="handleEnrollment(event, this)">
+                                <i class="fas fa-user-plus"></i>
+                                Enroll in Course
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="/login?next={{ request.url }}" class="btn-enroll-large">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login to Enroll
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Materials Section -->
+    <div class="materials-section" id="materials">
+        <h2 class="section-title">
+            <i class="fas fa-book"></i>
+            Course Materials
+        </h2>
+
+        {% if materials %}
+        <div class="materials-grid">
+            {% for material in materials %}
+            <div class="material-item">
+                <div class="material-header">
+                    <div class="material-icon">
+                        {% if material.category == 'books' %}
+                            <i class="fas fa-book"></i>
+                        {% elif material.category == 'reviewers' %}
+                            <i class="fas fa-file-alt"></i>
+                        {% elif material.category == 'audio' %}
+                            <i class="fas fa-file-audio"></i>
+                        {% else %}
+                            <i class="fas fa-file"></i>
+                        {% endif %}
+                    </div>
+                    <div class="material-info">
+                        <div class="material-name">{{ material.original_filename }}</div>
+                        <div class="material-meta">
+                            <span><i class="fas fa-tag"></i> {{ material.category.title() }}</span>
+                            {% if material.file_size %}
+                            <span><i class="fas fa-hdd"></i> {{ "%.1f"|format((material.file_size or 0) / 1024 / 1024) }} MB</span>
+                            {% endif %}
+                            <span><i class="fas fa-calendar"></i> Added {{ material.added_at.strftime('%Y-%m-%d') if material.added_at else material.upload_date.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        {% if material.description %}
+                        <div style="margin-top: 0.5rem; color: #555; font-size: 0.9rem;">
+                            {{ material.description }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if session.user_id and user_enrollment and user_enrollment.status == 'approved' %}
+                <div class="material-actions">
+                    <a href="/api/view/{{ material.id }}" class="btn-material btn-view-material" target="_blank">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="/api/download/{{ material.id }}" class="btn-material btn-download-material">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                </div>
+                {% elif not session.user_id %}
+                <div class="material-actions">
+                    <span style="color: #666; font-size: 0.85rem; padding: 0.5rem;">
+                        <i class="fas fa-lock"></i> Login required to access materials
+                    </span>
+                </div>
+                {% elif not user_enrollment %}
+                <div class="material-actions">
+                    <span style="color: #666; font-size: 0.85rem; padding: 0.5rem;">
+                        <i class="fas fa-lock"></i> Enrollment required to access materials
+                    </span>
+                </div>
+                {% else %}
+                <div class="material-actions">
+                    <span style="color: #666; font-size: 0.85rem; padding: 0.5rem;">
+                        <i class="fas fa-clock"></i> Available after enrollment approval
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-materials">
+            <div class="no-materials-icon">📚</div>
+            <h4>No Materials Available</h4>
+            <p>Course materials will be added by the instructor soon.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Students Section -->
+    {% if recent_enrollments %}
+    <div class="recent-students">
+        <h2 class="section-title">
+            <i class="fas fa-users"></i>
+            Recent Students
+        </h2>
+        <div class="students-list">
+            {% for enrollment in recent_enrollments %}
+            <div class="student-avatar" 
+                 title="{{ enrollment.full_name or enrollment.username }} - Joined {{ enrollment.approved_at[:10] if enrollment.approved_at else 'Recently' }}"
+                 data-name="{{ enrollment.full_name or enrollment.username }}">
+                {{ (enrollment.full_name or enrollment.username)[0].upper() }}
+            </div>
+            {% endfor %}
+            {% if course.enrolled_count > 5 %}
+            <div class="student-avatar" 
+                 title="{{ course.enrolled_count - 5 }} more students"
+                 style="background: rgba(102, 126, 234, 0.5); color: white;">
+                +{{ course.enrolled_count - 5 }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function handleEnrollment(event, button) {
+    // Show loading state
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enrolling...';
+    
+    // Restore button if form doesn't submit for some reason
+    setTimeout(() => {
+        if (button.disabled) {
+            button.disabled = false;
+            button.innerHTML = originalContent;
+        }
+    }, 10000);
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Add loading states to material links
+document.querySelectorAll('.btn-view-material, .btn-download-material').forEach(link => {
+    link.addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-spinner fa-spin';
+        
+        // Restore icon after 2 seconds
+        setTimeout(() => {
+            icon.className = originalClass;
+        }, 2000);
+    });
+});
+
+// Auto-refresh enrollment status for pending enrollments
+{% if user_enrollment and user_enrollment.status == 'pending' %}
+setInterval(() => {
+    fetch('/api/enrollment-status/{{ course.id }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'pending') {
+                // Reload page to show updated status
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.log('Status check failed:', error);
+        });
+}, 30000); // Check every 30 seconds
+{% endif %}
+
+// Add animation to material items on scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.material-item').forEach(item => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    observer.observe(item);
+});
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

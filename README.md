@@ -75,7 +75,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/jlpt-study-platform.git
+   git clone https://github.com/charnyladaro/JLPT_Reviewer.git
    cd jlpt-study-platform
    ```
 
